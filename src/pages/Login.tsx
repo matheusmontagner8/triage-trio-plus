@@ -5,6 +5,14 @@ import { ESPECIALIDADES, setSession } from '@/lib/store';
 
 const FUNCIONARIOS_RECEPCAO = ['Ana Santos'];
 const FUNCIONARIOS_ENFERMAGEM = ['Carlos Oliveira', 'Mariana Silva'];
+const FUNCIONARIOS_MEDICOS = [
+  'Dr. Ricardo Mendes',
+  'Dra. Fernanda Costa',
+  'Dr. Paulo Almeida',
+  'Dra. Juliana Rocha',
+  'Dr. André Barbosa',
+  'Dra. Camila Ferreira',
+];
 
 type Role = 'recepcao' | 'enfermagem' | 'medico';
 
@@ -25,14 +33,14 @@ const Login = () => {
 
   const roles: { id: Role; label: string; icon: string; desc: string }[] = [
     { id: 'recepcao', label: 'Recepção', icon: '🏥', desc: 'Cadastro de pacientes' },
-    { id: 'enfermagem', label: 'Triagem de Enfermagem', icon: '💉', desc: 'Sinais vitais e pré-triagem' },
-    { id: 'medico', label: 'Médico', icon: '🩺', desc: 'Avaliação e classificação' },
+    { id: 'enfermagem', label: 'Triagem de Enfermagem', icon: '💉', desc: 'Sinais vitais e classificação' },
+    { id: 'medico', label: 'Médico', icon: '🩺', desc: 'Chamada e atendimento' },
   ];
 
   const getNomes = () => {
     if (role === 'recepcao') return FUNCIONARIOS_RECEPCAO;
     if (role === 'enfermagem') return FUNCIONARIOS_ENFERMAGEM;
-    return ['Dr. Ricardo Mendes'];
+    return FUNCIONARIOS_MEDICOS;
   };
 
   return (

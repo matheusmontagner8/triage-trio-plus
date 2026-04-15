@@ -2,7 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import TriageProtocol from '@/components/TriageProtocol';
-import { getAllPacientes, updateFicha, getSession, clearSession, type Paciente } from '@/lib/store';
+import { getAllPacientes, updateFicha, fallbackTriage, getSession, clearSession, type Paciente } from '@/lib/store';
+
+const COLOR_MAP: Record<string, { dot: string; bg: string; border: string; text: string }> = {
+  VERMELHO: { dot: 'bg-triage-red', bg: 'bg-triage-red-bg', border: 'border-triage-red-border', text: 'text-triage-red' },
+  LARANJA: { dot: 'bg-triage-orange', bg: 'bg-triage-orange-bg', border: 'border-triage-orange-border', text: 'text-triage-orange' },
+  AMARELO: { dot: 'bg-triage-yellow', bg: 'bg-triage-yellow-bg', border: 'border-triage-yellow-border', text: 'text-triage-yellow' },
+  VERDE: { dot: 'bg-triage-green', bg: 'bg-triage-green-bg', border: 'border-triage-green-border', text: 'text-triage-green' },
+};
 
 const Enfermagem = () => {
   const navigate = useNavigate();
@@ -12,8 +19,13 @@ const Enfermagem = () => {
   const [temp, setTemp] = useState('');
   const [bpSys, setBpSys] = useState('');
   const [bpDia, setBpDia] = useState('');
+  const [satO2, setSatO2] = useState('');
+  const [fc, setFc] = useState('');
+  const [glicemia, setGlicemia] = useState('');
+  const [fr, setFr] = useState('');
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState(false);
+  const [resultadoTriagem, setResultadoTriagem] = useState<{ cor: string; urgencia: string; tempo: string; alertas: string[] } | null>(null);
 
   useEffect(() => {
     if (!session || session.role !== 'enfermagem') {
@@ -30,29 +42,57 @@ const Enfermagem = () => {
     setPacientes(all);
   };
 
+  const clearForm = () => {
+    setTemp(''); setBpSys(''); setBpDia(''); setSatO2(''); setFc(''); setGlicemia(''); setFr('');
+  };
+
   const salvarSinais = () => {
     setErro('');
     if (!selected) return;
     if (!temp) { setErro('Informe a temperatura.'); return; }
     if (!bpSys || !bpDia) { setErro('Informe a pressão arterial.'); return; }
+    if (!satO2) { setErro('Informe a saturação de oxigênio.'); return; }
+    if (!fc) { setErro('Informe a frequência cardíaca.'); return; }
+    if (!glicemia) { setErro('Informe a glicemia (dextro).'); return; }
+    if (!fr) { setErro('Informe a frequência respiratória.'); return; }
+
+    const tempVal = parseFloat(temp);
+    const sysVal = parseInt(bpSys);
+    const diaVal = parseInt(bpDia);
+    const satVal = parseFloat(satO2);
+    const fcVal = parseInt(fc);
+    const gliVal = parseFloat(glicemia);
+    const frVal = parseInt(fr);
+
+    // Run triage classification
+    const triagem = fallbackTriage(tempVal, sysVal, diaVal, satVal, fcVal, gliVal, frVal);
 
     updateFicha(selected.codigo, {
-      temperatura: parseFloat(temp),
-      pressaoSistolica: parseInt(bpSys),
-      pressaoDiastolica: parseInt(bpDia),
+      temperatura: tempVal,
+      pressaoSistolica: sysVal,
+      pressaoDiastolica: diaVal,
+      saturacaoO2: satVal,
+      frequenciaCardiaca: fcVal,
+      glicemia: gliVal,
+      frequenciaRespiratoria: frVal,
       triado: true,
+      triagem,
     });
 
+    setResultadoTriagem(triagem);
     setSucesso(true);
     setTimeout(() => {
       setSelected(null);
-      setTemp(''); setBpSys(''); setBpDia('');
+      clearForm();
       setSucesso(false);
+      setResultadoTriagem(null);
       refreshList();
-    }, 2000);
+    }, 4000);
   };
 
   if (!session || session.role !== 'enfermagem') return null;
+
+  const colors = resultadoTriagem ? COLOR_MAP[resultadoTriagem.cor] || COLOR_MAP.VERDE : null;
 
   return (
     <div className="grid grid-cols-[280px_1fr] min-h-screen">
@@ -70,7 +110,7 @@ const Enfermagem = () => {
       {/* Main */}
       <main className="p-10 max-w-[900px]">
         <h1 className="font-heading text-[28px] font-extrabold mb-1.5">Triagem de Enfermagem</h1>
-        <p className="text-sm text-muted-foreground mb-8">Selecione um paciente para registrar os sinais vitais.</p>
+        <p className="text-sm text-muted-foreground mb-8">Selecione um paciente, registre os sinais vitais e a classificação será gerada automaticamente.</p>
 
         {/* Patient list */}
         <div className="bg-card border border-border rounded-2xl p-6 mb-8">
@@ -84,7 +124,7 @@ const Enfermagem = () => {
               {pacientes.map((p) => (
                 <button
                   key={p.codigo}
-                  onClick={() => { setSelected(p); setSucesso(false); setErro(''); setTemp(''); setBpSys(''); setBpDia(''); }}
+                  onClick={() => { setSelected(p); setSucesso(false); setErro(''); setResultadoTriagem(null); clearForm(); }}
                   className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                     selected?.codigo === p.codigo ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground/30'
                   }`}
@@ -117,18 +157,38 @@ const Enfermagem = () => {
             <div className="grid grid-cols-3 gap-3.5 mb-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-muted-foreground font-medium">Temperatura (°C)</label>
-                <input type="number" value={temp} onChange={(e) => setTemp(e.target.value)} placeholder="38.5" step={0.1}
+                <input type="number" value={temp} onChange={(e) => setTemp(e.target.value)} placeholder="36.5" step={0.1}
                   className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-muted-foreground font-medium">Pressão sistólica</label>
+                <label className="text-xs text-muted-foreground font-medium">Pressão sistólica (mmHg)</label>
                 <input type="number" value={bpSys} onChange={(e) => setBpSys(e.target.value)} placeholder="120"
                   className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-muted-foreground font-medium">Pressão diastólica</label>
+                <label className="text-xs text-muted-foreground font-medium">Pressão diastólica (mmHg)</label>
                 <input type="number" value={bpDia} onChange={(e) => setBpDia(e.target.value)} placeholder="80"
                   className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-muted-foreground font-medium">Saturação O₂ (%)</label>
+                <input type="number" value={satO2} onChange={(e) => setSatO2(e.target.value)} placeholder="98"
+                  className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-muted-foreground font-medium">Frequência cardíaca (bpm)</label>
+                <input type="number" value={fc} onChange={(e) => setFc(e.target.value)} placeholder="80"
+                  className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-muted-foreground font-medium">Glicemia / Dextro (mg/dL)</label>
+                <input type="number" value={glicemia} onChange={(e) => setGlicemia(e.target.value)} placeholder="100"
+                  className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors" />
+              </div>
+              <div className="flex flex-col gap-1.5 col-span-3">
+                <label className="text-xs text-muted-foreground font-medium">Frequência respiratória (irpm)</label>
+                <input type="number" value={fr} onChange={(e) => setFr(e.target.value)} placeholder="18"
+                  className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors max-w-[calc(33.33%-0.583rem)]" />
               </div>
             </div>
 
@@ -136,16 +196,31 @@ const Enfermagem = () => {
 
             <button onClick={salvarSinais}
               className="w-full bg-primary text-primary-foreground rounded-[10px] py-3.5 text-sm font-semibold font-heading hover:opacity-90 transition-opacity">
-              Salvar sinais vitais
+              Salvar sinais vitais e classificar
             </button>
           </div>
         )}
 
-        {sucesso && (
-          <div className="bg-triage-green-bg border border-triage-green-border rounded-xl p-5 text-center">
+        {sucesso && resultadoTriagem && colors && (
+          <div className={`${colors.bg} border ${colors.border} rounded-xl p-6 text-center relative overflow-hidden`}>
+            <div className={`absolute top-0 left-0 right-0 h-[3px] ${colors.dot}`} />
             <div className="text-3xl mb-2">✓</div>
-            <div className="font-heading font-bold text-triage-green">Sinais vitais registrados!</div>
-            <p className="text-sm text-muted-foreground">Paciente encaminhado para avaliação médica.</p>
+            <div className={`font-heading font-bold text-lg ${colors.text}`}>Triagem concluída!</div>
+            <div className="mt-3 flex items-center justify-center gap-3">
+              <span className={`inline-block px-4 py-1.5 rounded-full font-mono text-sm border ${colors.border} ${colors.text} font-bold`}>
+                {resultadoTriagem.cor}
+              </span>
+              <span className="text-sm text-muted-foreground">—</span>
+              <span className="text-sm font-semibold">{resultadoTriagem.urgencia}</span>
+              <span className="text-sm text-muted-foreground">—</span>
+              <span className="text-sm">Espera: <strong>{resultadoTriagem.tempo}</strong></span>
+            </div>
+            {resultadoTriagem.alertas.length > 0 && (
+              <div className="mt-3 text-sm text-triage-red font-semibold">
+                ⚠ {resultadoTriagem.alertas.join(' · ')}
+              </div>
+            )}
+            <p className="text-sm text-muted-foreground mt-3">Paciente encaminhado para atendimento médico.</p>
           </div>
         )}
       </main>
