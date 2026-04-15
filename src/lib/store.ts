@@ -12,8 +12,12 @@ export interface Paciente {
   temperatura?: number;
   pressaoSistolica?: number;
   pressaoDiastolica?: number;
+  saturacaoO2?: number;
+  frequenciaCardiaca?: number;
+  glicemia?: number;
+  frequenciaRespiratoria?: number;
   triado?: boolean;
-  // Triage result
+  // Triage result (set by nursing)
   triagem?: {
     cor: string;
     urgencia: string;
@@ -21,6 +25,9 @@ export interface Paciente {
     alertas: string[];
   };
   especialidade?: string;
+  // Doctor call
+  chamado?: boolean;
+  medicoResponsavel?: string;
 }
 
 export interface UserSession {
@@ -101,15 +108,30 @@ export function clearSession() {
   localStorage.removeItem('triagem_session');
 }
 
-export function fallbackTriage(temp: number, sys: number, dia: number) {
+export function fallbackTriage(
+  temp: number, sys: number, dia: number,
+  satO2?: number, fc?: number, glicemia?: number, fr?: number
+) {
   let cor = 'VERDE', urgencia = 'Pouco urgente', tempo = '120 min', alertas: string[] = [];
-  if (temp > 40 || temp < 35 || sys > 180 || dia > 120) {
+
+  // Critical
+  if (temp > 40 || temp < 35 || sys > 180 || dia > 120 || (satO2 !== undefined && satO2 < 90) || (fc !== undefined && (fc > 150 || fc < 40)) || (glicemia !== undefined && (glicemia < 50 || glicemia > 400)) || (fr !== undefined && (fr > 35 || fr < 8))) {
     cor = 'VERMELHO'; urgencia = 'Emergência'; tempo = 'Imediato';
-    alertas.push('Sinais vitais críticos');
-  } else if (temp > 39 || sys > 160 || dia > 100) {
+    if (temp > 40 || temp < 35) alertas.push('Temperatura crítica');
+    if (sys > 180 || dia > 120) alertas.push('Pressão arterial crítica');
+    if (satO2 !== undefined && satO2 < 90) alertas.push('Saturação O₂ crítica');
+    if (fc !== undefined && (fc > 150 || fc < 40)) alertas.push('Frequência cardíaca crítica');
+    if (glicemia !== undefined && (glicemia < 50 || glicemia > 400)) alertas.push('Glicemia crítica');
+    if (fr !== undefined && (fr > 35 || fr < 8)) alertas.push('Frequência respiratória crítica');
+  }
+  // Very urgent
+  else if (temp > 39 || sys > 160 || dia > 100 || (satO2 !== undefined && satO2 < 93) || (fc !== undefined && (fc > 130 || fc < 50)) || (glicemia !== undefined && (glicemia < 70 || glicemia > 300)) || (fr !== undefined && (fr > 28 || fr < 10))) {
     cor = 'LARANJA'; urgencia = 'Muito urgente'; tempo = '10 min';
-  } else if (temp >= 38 || sys >= 140 || dia >= 90) {
+  }
+  // Urgent
+  else if (temp >= 38 || sys >= 140 || dia >= 90 || (satO2 !== undefined && satO2 < 95) || (fc !== undefined && (fc > 110 || fc < 55)) || (glicemia !== undefined && (glicemia < 80 || glicemia > 200)) || (fr !== undefined && (fr > 24 || fr < 12))) {
     cor = 'AMARELO'; urgencia = 'Urgente'; tempo = '60 min';
   }
+
   return { cor, urgencia, tempo, alertas };
 }
