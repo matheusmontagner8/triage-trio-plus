@@ -1,0 +1,115 @@
+// Types
+export interface Paciente {
+  codigo: string;
+  nome: string;
+  idade: string;
+  sintomas: string;
+  alergia: string;
+  comorbidade: string;
+  timestamp: string;
+  processado: boolean;
+  // Vital signs (filled by nursing)
+  temperatura?: number;
+  pressaoSistolica?: number;
+  pressaoDiastolica?: number;
+  triado?: boolean;
+  // Triage result
+  triagem?: {
+    cor: string;
+    urgencia: string;
+    tempo: string;
+    alertas: string[];
+  };
+  especialidade?: string;
+}
+
+export interface UserSession {
+  role: 'recepcao' | 'enfermagem' | 'medico';
+  nome: string;
+  especialidade?: string;
+}
+
+export const ESPECIALIDADES = [
+  { id: 'clinica', nome: 'Clínica Médica', desc: 'Atendimento geral e integral' },
+  { id: 'pediatria', nome: 'Pediatria', desc: 'Saúde de crianças e adolescentes' },
+  { id: 'cirurgia', nome: 'Cirurgia Geral', desc: 'Procedimentos cirúrgicos' },
+  { id: 'ginecologia', nome: 'Ginecologia e Obstetrícia', desc: 'Saúde reprodutiva e gestação' },
+  { id: 'anestesiologia', nome: 'Anestesiologia', desc: 'Controle da dor e suporte vital' },
+  { id: 'cardiologia', nome: 'Cardiologia', desc: 'Doenças do coração e vasos' },
+  { id: 'dermatologia', nome: 'Dermatologia', desc: 'Doenças da pele, cabelos e unhas' },
+  { id: 'neurologia', nome: 'Neurologia', desc: 'Distúrbios do sistema nervoso' },
+];
+
+export function getFichas(): Record<string, Paciente> {
+  return JSON.parse(localStorage.getItem('triagem_fichas') || '{}');
+}
+
+export function saveFicha(paciente: Paciente) {
+  const fichas = getFichas();
+  fichas[paciente.codigo] = paciente;
+  fichas['__nome__' + paciente.nome.toLowerCase().replace(/\s+/g, '_')] = paciente.codigo as any;
+  localStorage.setItem('triagem_fichas', JSON.stringify(fichas));
+}
+
+export function getAllPacientes(): Paciente[] {
+  const fichas = getFichas();
+  return Object.entries(fichas)
+    .filter(([key]) => !key.startsWith('__'))
+    .map(([, val]) => val as Paciente);
+}
+
+export function updateFicha(codigo: string, updates: Partial<Paciente>) {
+  const fichas = getFichas();
+  if (fichas[codigo]) {
+    fichas[codigo] = { ...fichas[codigo], ...updates };
+    localStorage.setItem('triagem_fichas', JSON.stringify(fichas));
+  }
+}
+
+export function buscarPaciente(query: string): Paciente | null {
+  const fichas = getFichas();
+  if (fichas[query] && !query.startsWith('__')) return fichas[query] as Paciente;
+  
+  const chaveNome = '__nome__' + query.toLowerCase().replace(/\s+/g, '_');
+  if (fichas[chaveNome]) return fichas[fichas[chaveNome] as any] as Paciente;
+  
+  const nomeLower = query.toLowerCase();
+  for (const [key, val] of Object.entries(fichas)) {
+    if (key.startsWith('__')) continue;
+    const p = val as Paciente;
+    if (p.nome?.toLowerCase().includes(nomeLower)) return p;
+  }
+  return null;
+}
+
+export function gerarCodigo(nome: string): string {
+  const initials = nome.trim().split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+  const num = Math.floor(1000 + Math.random() * 9000);
+  return initials + num;
+}
+
+export function getSession(): UserSession | null {
+  const s = localStorage.getItem('triagem_session');
+  return s ? JSON.parse(s) : null;
+}
+
+export function setSession(session: UserSession) {
+  localStorage.setItem('triagem_session', JSON.stringify(session));
+}
+
+export function clearSession() {
+  localStorage.removeItem('triagem_session');
+}
+
+export function fallbackTriage(temp: number, sys: number, dia: number) {
+  let cor = 'VERDE', urgencia = 'Pouco urgente', tempo = '120 min', alertas: string[] = [];
+  if (temp > 40 || temp < 35 || sys > 180 || dia > 120) {
+    cor = 'VERMELHO'; urgencia = 'Emergência'; tempo = 'Imediato';
+    alertas.push('Sinais vitais críticos');
+  } else if (temp > 39 || sys > 160 || dia > 100) {
+    cor = 'LARANJA'; urgencia = 'Muito urgente'; tempo = '10 min';
+  } else if (temp >= 38 || sys >= 140 || dia >= 90) {
+    cor = 'AMARELO'; urgencia = 'Urgente'; tempo = '60 min';
+  }
+  return { cor, urgencia, tempo, alertas };
+}
