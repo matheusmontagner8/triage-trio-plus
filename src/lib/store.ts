@@ -28,6 +28,15 @@ export interface Paciente {
   // Doctor call
   chamado?: boolean;
   medicoResponsavel?: string;
+  // Prescription
+  prescricao?: {
+    diagnostico: string;
+    medicamentos: string;
+    procedimentos: string;
+    observacoes: string;
+    dataAtendimento: string;
+  };
+  atendido?: boolean;
 }
 
 export interface UserSession {
