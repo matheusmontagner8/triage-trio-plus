@@ -178,6 +178,84 @@ const Dashboard = () => {
             </div>
           )}
         </div>
+
+        {/* History */}
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+            <div className="font-heading font-bold text-[15px]">
+              Histórico de atendimentos ({historicoFiltrado.length})
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nome, código ou diagnóstico..."
+                  value={busca}
+                  onChange={e => setBusca(e.target.value)}
+                  className="pl-9 w-full sm:w-72"
+                />
+              </div>
+              <div className="flex gap-1.5 flex-wrap">
+                {(['TODOS', 'VERMELHO', 'LARANJA', 'AMARELO', 'VERDE'] as const).map(cor => {
+                  const active = filtroCor === cor;
+                  const c = cor === 'TODOS' ? null : COLOR_LABELS[cor];
+                  return (
+                    <button
+                      key={cor}
+                      onClick={() => setFiltroCor(cor)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        active ? 'bg-primary text-primary-foreground border-primary' : 'bg-surface border-border text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {c && <span className={`w-2 h-2 rounded-full ${c.dot}`} />}
+                      {cor === 'TODOS' ? 'Todos' : c?.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {historicoFiltrado.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4">Nenhum atendimento encontrado.</p>
+          ) : (
+            <div className="space-y-2">
+              {historicoFiltrado.map(p => {
+                const c = p.triagem ? COLOR_LABELS[p.triagem.cor] || COLOR_LABELS.VERDE : COLOR_LABELS.VERDE;
+                return (
+                  <div key={p.codigo} className={`p-3 rounded-xl border ${c.border} ${c.bg}`}>
+                    <div className="flex items-start gap-3">
+                      <div className={`w-3 h-3 rounded-full ${c.dot} shrink-0 mt-1.5`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-baseline gap-x-2">
+                          <div className="text-sm font-semibold">{p.nome}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {p.idade} anos · <span className="font-mono text-primary">{p.codigo}</span>
+                          </div>
+                        </div>
+                        {p.prescricao?.diagnostico && (
+                          <div className="text-xs mt-1">
+                            <span className="text-muted-foreground">Diagnóstico: </span>
+                            <span className="font-medium">{p.prescricao.diagnostico}</span>
+                          </div>
+                        )}
+                        {p.medicoResponsavel && (
+                          <div className="text-[11px] text-muted-foreground mt-0.5">
+                            Atendido por {p.medicoResponsavel}
+                            {p.especialidade && ` · ${p.especialidade}`}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground font-mono text-right shrink-0">
+                        {p.prescricao?.dataAtendimento || '—'}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
