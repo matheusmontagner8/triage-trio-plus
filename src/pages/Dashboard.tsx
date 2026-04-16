@@ -72,6 +72,14 @@ const Dashboard = () => {
 
   const maxCor = Math.max(...Object.values(contagem), 1);
 
+  const historicoFiltrado = useMemo(() => {
+    const q = busca.trim().toLowerCase();
+    return atendidos
+      .filter(p => filtroCor === 'TODOS' || p.triagem?.cor === filtroCor)
+      .filter(p => !q || p.nome.toLowerCase().includes(q) || p.codigo.toLowerCase().includes(q) || p.prescricao?.diagnostico?.toLowerCase().includes(q))
+      .sort((a, b) => (b.prescricao?.dataAtendimento || '').localeCompare(a.prescricao?.dataAtendimento || ''));
+  }, [atendidos, busca, filtroCor]);
+
   return (
     <div className="min-h-screen">
       {/* Header */}
