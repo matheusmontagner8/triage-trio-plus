@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Search } from 'lucide-react';
 import Logo from '@/components/Logo';
+import { Input } from '@/components/ui/input';
 import { getAllPacientes, type Paciente } from '@/lib/store';
 
 const COLOR_LABELS: Record<string, { label: string; dot: string; bg: string; border: string }> = {
@@ -13,6 +15,8 @@ const COLOR_LABELS: Record<string, { label: string; dot: string; bg: string; bor
 const Dashboard = () => {
   const navigate = useNavigate();
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
+  const [busca, setBusca] = useState('');
+  const [filtroCor, setFiltroCor] = useState<string>('TODOS');
 
   useEffect(() => {
     refresh();
@@ -140,7 +144,7 @@ const Dashboard = () => {
         </div>
 
         {/* Waiting patients */}
-        <div className="bg-card border border-border rounded-2xl p-6">
+        <div className="bg-card border border-border rounded-2xl p-6 mb-8">
           <div className="font-heading font-bold text-[15px] mb-4">
             Aguardando atendimento ({aguardando.length})
           </div>
