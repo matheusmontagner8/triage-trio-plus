@@ -17,6 +17,29 @@ const Dashboard = () => {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [busca, setBusca] = useState('');
   const [filtroCor, setFiltroCor] = useState<string>('TODOS');
+  const [filtroPeriodo, setFiltroPeriodo] = useState<'TODOS' | 'HOJE' | 'SEMANA' | 'MES'>('TODOS');
+
+  // Parse pt-BR date "dd/mm/yyyy, hh:mm:ss" to Date
+  const parsePtDate = (s?: string): Date | null => {
+    if (!s) return null;
+    const m = s.match(/(\d+)\/(\d+)\/(\d+),?\s*(\d+):(\d+):?(\d+)?/);
+    if (!m) return null;
+    return new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5], +(m[6] || '0'));
+  };
+
+  const dentroDoPeriodo = (dataStr?: string): boolean => {
+    if (filtroPeriodo === 'TODOS') return true;
+    const d = parsePtDate(dataStr);
+    if (!d) return false;
+    const agora = new Date();
+    if (filtroPeriodo === 'HOJE') {
+      return d.toDateString() === agora.toDateString();
+    }
+    const diffDias = (agora.getTime() - d.getTime()) / 86400000;
+    if (filtroPeriodo === 'SEMANA') return diffDias <= 7;
+    if (filtroPeriodo === 'MES') return diffDias <= 30;
+    return true;
+  };
 
   useEffect(() => {
     refresh();
@@ -76,9 +99,10 @@ const Dashboard = () => {
     const q = busca.trim().toLowerCase();
     return atendidos
       .filter(p => filtroCor === 'TODOS' || p.triagem?.cor === filtroCor)
+      .filter(p => dentroDoPeriodo(p.prescricao?.dataAtendimento))
       .filter(p => !q || p.nome.toLowerCase().includes(q) || p.codigo.toLowerCase().includes(q) || p.prescricao?.diagnostico?.toLowerCase().includes(q))
       .sort((a, b) => (b.prescricao?.dataAtendimento || '').localeCompare(a.prescricao?.dataAtendimento || ''));
-  }, [atendidos, busca, filtroCor]);
+  }, [atendidos, busca, filtroCor, filtroPeriodo]);
 
   return (
     <div className="min-h-screen">
@@ -209,6 +233,27 @@ const Dashboard = () => {
                     >
                       {c && <span className={`w-2 h-2 rounded-full ${c.dot}`} />}
                       {cor === 'TODOS' ? 'Todos' : c?.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex gap-1.5 flex-wrap">
+                {([
+                  { key: 'TODOS', label: 'Todo período' },
+                  { key: 'HOJE', label: 'Hoje' },
+                  { key: 'SEMANA', label: 'Última semana' },
+                  { key: 'MES', label: 'Último mês' },
+                ] as const).map(({ key, label }) => {
+                  const active = filtroPeriodo === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setFiltroPeriodo(key)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        active ? 'bg-primary text-primary-foreground border-primary' : 'bg-surface border-border text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {label}
                     </button>
                   );
                 })}
