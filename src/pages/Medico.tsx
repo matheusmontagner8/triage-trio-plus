@@ -52,18 +52,19 @@ const Medico = () => {
     refreshFila();
   };
 
+  const [fichaFinalizada, setFichaFinalizada] = useState<Paciente | null>(null);
+
   const finalizarAtendimento = () => {
     if (ficha && diagnostico.trim()) {
-      updateFicha(ficha.codigo, {
-        atendido: true,
-        prescricao: {
-          diagnostico,
-          medicamentos,
-          procedimentos,
-          observacoes,
-          dataAtendimento: new Date().toLocaleString('pt-BR'),
-        },
-      });
+      const prescricaoData = {
+        diagnostico,
+        medicamentos,
+        procedimentos,
+        observacoes,
+        dataAtendimento: new Date().toLocaleString('pt-BR'),
+      };
+      updateFicha(ficha.codigo, { atendido: true, prescricao: prescricaoData });
+      setFichaFinalizada({ ...ficha, atendido: true, prescricao: prescricaoData, medicoResponsavel: session?.nome });
     }
     setFicha(null);
     setAtendendo(false);
@@ -72,6 +73,55 @@ const Medico = () => {
     setProcedimentos('');
     setObservacoes('');
     refreshFila();
+  };
+
+  const imprimirPrescricao = () => {
+    if (!fichaFinalizada) return;
+    const p = fichaFinalizada;
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Prescrição - ${p.nome}</title>
+    <style>
+      body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;color:#222;font-size:14px}
+      h1{font-size:20px;margin-bottom:4px} h2{font-size:15px;color:#555;margin:20px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}
+      .header{text-align:center;border-bottom:2px solid #333;padding-bottom:16px;margin-bottom:20px}
+      .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px} .field{margin-bottom:6px}
+      .label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px} .value{font-size:14px}
+      .rx{background:#f5f5f5;border:1px solid #ddd;border-radius:8px;padding:16px;margin:8px 0}
+      .footer{margin-top:40px;text-align:center;font-size:11px;color:#999;border-top:1px solid #ddd;padding-top:16px}
+      .sig{margin-top:60px;text-align:center} .sig-line{border-top:1px solid #333;width:250px;margin:0 auto;padding-top:6px}
+      @media print{body{margin:20px}}
+    </style></head><body>
+    <div class="header">
+      <h1>TriageEngine — Prescrição Médica</h1>
+      <div style="font-size:12px;color:#666">Data: ${p.prescricao?.dataAtendimento}</div>
+    </div>
+    <h2>Dados do Paciente</h2>
+    <div class="grid">
+      <div class="field"><div class="label">Nome</div><div class="value">${p.nome}</div></div>
+      <div class="field"><div class="label">Código</div><div class="value">${p.codigo}</div></div>
+      <div class="field"><div class="label">Idade</div><div class="value">${p.idade} anos</div></div>
+      <div class="field"><div class="label">Classificação</div><div class="value">${p.triagem?.cor} — ${p.triagem?.urgencia}</div></div>
+    </div>
+    <h2>Sinais Vitais</h2>
+    <div class="grid">
+      <div class="field"><div class="label">Temperatura</div><div class="value">${p.temperatura}°C</div></div>
+      <div class="field"><div class="label">Pressão arterial</div><div class="value">${p.pressaoSistolica}/${p.pressaoDiastolica} mmHg</div></div>
+      <div class="field"><div class="label">Saturação O₂</div><div class="value">${p.saturacaoO2}%</div></div>
+      <div class="field"><div class="label">Freq. cardíaca</div><div class="value">${p.frequenciaCardiaca} bpm</div></div>
+      <div class="field"><div class="label">Glicemia</div><div class="value">${p.glicemia} mg/dL</div></div>
+      <div class="field"><div class="label">Freq. respiratória</div><div class="value">${p.frequenciaRespiratoria} irpm</div></div>
+    </div>
+    <h2>Prescrição</h2>
+    <div class="rx"><div class="label">Diagnóstico</div><div class="value">${p.prescricao?.diagnostico || '—'}</div></div>
+    <div class="rx"><div class="label">Medicamentos</div><div class="value">${p.prescricao?.medicamentos || '—'}</div></div>
+    <div class="rx"><div class="label">Procedimentos</div><div class="value">${p.prescricao?.procedimentos || '—'}</div></div>
+    <div class="rx"><div class="label">Observações</div><div class="value">${p.prescricao?.observacoes || '—'}</div></div>
+    <div class="sig"><div class="sig-line">${p.medicoResponsavel || session?.nome}<br/><span style="font-size:11px;color:#888">${session?.especialidade || ''}</span></div></div>
+    <div class="footer">Documento gerado pelo sistema TriageEngine — Protocolo de Manchester<br/>Este documento não substitui a avaliação clínica presencial.</div>
+    </body></html>`);
+    w.document.close();
+    w.print();
   };
 
   if (!session || session.role !== 'medico') return null;
@@ -286,6 +336,33 @@ const Medico = () => {
             >
               Finalizar atendimento e salvar prescrição
             </button>
+          </div>
+        )}
+
+        {/* Print prescription after finalization */}
+        {fichaFinalizada && !atendendo && (
+          <div className="bg-card border border-border rounded-2xl p-6 mb-8">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-3 h-3 rounded-full bg-triage-green" />
+              <div className="font-heading font-bold text-[15px]">Atendimento finalizado</div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Paciente <span className="font-semibold text-foreground">{fichaFinalizada.nome}</span> ({fichaFinalizada.codigo}) atendido com sucesso.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={imprimirPrescricao}
+                className="flex items-center gap-2 bg-primary text-primary-foreground rounded-[10px] px-5 py-3 text-sm font-semibold hover:opacity-90 transition-opacity"
+              >
+                🖨️ Imprimir prescrição
+              </button>
+              <button
+                onClick={() => setFichaFinalizada(null)}
+                className="border border-border rounded-[10px] px-5 py-3 text-sm font-semibold hover:bg-surface2 transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         )}
       </main>
