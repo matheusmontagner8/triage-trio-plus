@@ -237,6 +237,27 @@ const Dashboard = () => {
                   );
                 })}
               </div>
+              <div className="flex gap-1.5 flex-wrap">
+                {([
+                  { key: 'TODOS', label: 'Todo período' },
+                  { key: 'HOJE', label: 'Hoje' },
+                  { key: 'SEMANA', label: 'Última semana' },
+                  { key: 'MES', label: 'Último mês' },
+                ] as const).map(({ key, label }) => {
+                  const active = filtroPeriodo === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setFiltroPeriodo(key)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        active ? 'bg-primary text-primary-foreground border-primary' : 'bg-surface border-border text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
