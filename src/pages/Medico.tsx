@@ -19,6 +19,10 @@ const Medico = () => {
   const [ficha, setFicha] = useState<Paciente | null>(null);
   const [fila, setFila] = useState<Paciente[]>([]);
   const [atendendo, setAtendendo] = useState(false);
+  const [diagnostico, setDiagnostico] = useState('');
+  const [medicamentos, setMedicamentos] = useState('');
+  const [procedimentos, setProcedimentos] = useState('');
+  const [observacoes, setObservacoes] = useState('');
 
   useEffect(() => {
     if (!session || session.role !== 'medico') {
@@ -49,8 +53,24 @@ const Medico = () => {
   };
 
   const finalizarAtendimento = () => {
+    if (ficha && diagnostico.trim()) {
+      updateFicha(ficha.codigo, {
+        atendido: true,
+        prescricao: {
+          diagnostico,
+          medicamentos,
+          procedimentos,
+          observacoes,
+          dataAtendimento: new Date().toLocaleString('pt-BR'),
+        },
+      });
+    }
     setFicha(null);
     setAtendendo(false);
+    setDiagnostico('');
+    setMedicamentos('');
+    setProcedimentos('');
+    setObservacoes('');
     refreshFila();
   };
 
@@ -216,9 +236,55 @@ const Medico = () => {
               </div>
             </div>
 
-            <button onClick={finalizarAtendimento}
-              className="w-full bg-primary text-primary-foreground rounded-[10px] py-3.5 text-sm font-semibold font-heading hover:opacity-90 transition-opacity">
-              Finalizar atendimento
+            {/* Prescription */}
+            <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-3 flex items-center gap-2">
+              Prescrição médica <span className="flex-1 h-px bg-border" />
+            </div>
+            <div className="space-y-3 mb-5">
+              <div>
+                <label className="text-[11px] text-muted-foreground mb-1 block">Diagnóstico *</label>
+                <textarea
+                  value={diagnostico}
+                  onChange={e => setDiagnostico(e.target.value)}
+                  placeholder="Descreva o diagnóstico do paciente..."
+                  className="w-full bg-surface2 border border-border rounded-[10px] p-3 text-sm min-h-[70px] resize-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] text-muted-foreground mb-1 block">Medicamentos prescritos</label>
+                <textarea
+                  value={medicamentos}
+                  onChange={e => setMedicamentos(e.target.value)}
+                  placeholder="Ex: Dipirona 500mg — 1 comp. de 6/6h por 3 dias..."
+                  className="w-full bg-surface2 border border-border rounded-[10px] p-3 text-sm min-h-[70px] resize-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] text-muted-foreground mb-1 block">Procedimentos realizados / solicitados</label>
+                <textarea
+                  value={procedimentos}
+                  onChange={e => setProcedimentos(e.target.value)}
+                  placeholder="Ex: Hemograma completo, Raio-X de tórax..."
+                  className="w-full bg-surface2 border border-border rounded-[10px] p-3 text-sm min-h-[60px] resize-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] text-muted-foreground mb-1 block">Observações adicionais</label>
+                <textarea
+                  value={observacoes}
+                  onChange={e => setObservacoes(e.target.value)}
+                  placeholder="Orientações ao paciente, retorno, encaminhamentos..."
+                  className="w-full bg-surface2 border border-border rounded-[10px] p-3 text-sm min-h-[60px] resize-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={finalizarAtendimento}
+              disabled={!diagnostico.trim()}
+              className="w-full bg-primary text-primary-foreground rounded-[10px] py-3.5 text-sm font-semibold font-heading hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Finalizar atendimento e salvar prescrição
             </button>
           </div>
         )}
