@@ -17,6 +17,29 @@ const Dashboard = () => {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [busca, setBusca] = useState('');
   const [filtroCor, setFiltroCor] = useState<string>('TODOS');
+  const [filtroPeriodo, setFiltroPeriodo] = useState<'TODOS' | 'HOJE' | 'SEMANA' | 'MES'>('TODOS');
+
+  // Parse pt-BR date "dd/mm/yyyy, hh:mm:ss" to Date
+  const parsePtDate = (s?: string): Date | null => {
+    if (!s) return null;
+    const m = s.match(/(\d+)\/(\d+)\/(\d+),?\s*(\d+):(\d+):?(\d+)?/);
+    if (!m) return null;
+    return new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5], +(m[6] || '0'));
+  };
+
+  const dentroDoPeriodo = (dataStr?: string): boolean => {
+    if (filtroPeriodo === 'TODOS') return true;
+    const d = parsePtDate(dataStr);
+    if (!d) return false;
+    const agora = new Date();
+    if (filtroPeriodo === 'HOJE') {
+      return d.toDateString() === agora.toDateString();
+    }
+    const diffDias = (agora.getTime() - d.getTime()) / 86400000;
+    if (filtroPeriodo === 'SEMANA') return diffDias <= 7;
+    if (filtroPeriodo === 'MES') return diffDias <= 30;
+    return true;
+  };
 
   useEffect(() => {
     refresh();
