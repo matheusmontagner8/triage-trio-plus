@@ -32,11 +32,18 @@ const Login = () => {
   const [role, setRole] = useState<Role | null>(null);
   const [nome, setNome] = useState('');
   const [especialidade, setEspecialidade] = useState('');
+  const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = () => {
     if (!role || !nome) return;
     if (role === 'medico' && !especialidade) return;
+    if (SENHAS[nome] !== senha) {
+      setErro('Senha incorreta. Tente novamente.');
+      return;
+    }
+    setErro('');
     setSession({ role, nome, especialidade: role === 'medico' ? especialidade : undefined });
     if (role === 'recepcao') navigate('/recepcao');
     else if (role === 'enfermagem') navigate('/enfermagem');
