@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { getAllPacientes, type Paciente } from '@/lib/store';
 
 const COLOR_LABELS: Record<string, { label: string; dot: string; bg: string; border: string }> = {
