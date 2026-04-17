@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { getAllPacientes, type Paciente } from '@/lib/store';
 
 const COLOR_LABELS: Record<string, { label: string; dot: string; bg: string; border: string }> = {
@@ -18,6 +19,7 @@ const Dashboard = () => {
   const [busca, setBusca] = useState('');
   const [filtroCor, setFiltroCor] = useState<string>('TODOS');
   const [filtroPeriodo, setFiltroPeriodo] = useState<'TODOS' | 'HOJE' | 'SEMANA' | 'MES'>('TODOS');
+  const [pacienteSelecionado, setPacienteSelecionado] = useState<Paciente | null>(null);
 
   // Parse pt-BR date "dd/mm/yyyy, hh:mm:ss" to Date
   const parsePtDate = (s?: string): Date | null => {
@@ -268,7 +270,11 @@ const Dashboard = () => {
               {historicoFiltrado.map(p => {
                 const c = p.triagem ? COLOR_LABELS[p.triagem.cor] || COLOR_LABELS.VERDE : COLOR_LABELS.VERDE;
                 return (
-                  <div key={p.codigo} className={`p-3 rounded-xl border ${c.border} ${c.bg}`}>
+                  <button
+                    key={p.codigo}
+                    onClick={() => setPacienteSelecionado(p)}
+                    className={`w-full text-left p-3 rounded-xl border ${c.border} ${c.bg} hover:opacity-90 hover:shadow-sm transition-all cursor-pointer`}
+                  >
                     <div className="flex items-start gap-3">
                       <div className={`w-3 h-3 rounded-full ${c.dot} shrink-0 mt-1.5`} />
                       <div className="flex-1 min-w-0">
@@ -295,13 +301,128 @@ const Dashboard = () => {
                         {p.prescricao?.dataAtendimento || '—'}
                       </div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
           )}
         </div>
       </main>
+
+      <Dialog open={!!pacienteSelecionado} onOpenChange={(o) => !o && setPacienteSelecionado(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          {pacienteSelecionado && (() => {
+            const p = pacienteSelecionado;
+            const c = p.triagem ? COLOR_LABELS[p.triagem.cor] || COLOR_LABELS.VERDE : COLOR_LABELS.VERDE;
+            return (
+              <>
+                <DialogHeader>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full ${c.dot}`} />
+                    <DialogTitle className="font-heading text-xl">{p.nome}</DialogTitle>
+                  </div>
+                  <DialogDescription>
+                    {p.idade} anos · <span className="font-mono text-primary">{p.codigo}</span>
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-5 mt-2">
+                  {/* Triagem */}
+                  {p.triagem && (
+                    <section>
+                      <h3 className="font-heading font-bold text-sm mb-2">Classificação de risco</h3>
+                      <div className={`rounded-xl border ${c.border} ${c.bg} p-3 text-sm`}>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1">
+                          <div><span className="text-muted-foreground">Cor:</span> <span className="font-semibold">{c.label}</span></div>
+                          <div><span className="text-muted-foreground">Urgência:</span> <span className="font-semibold">{p.triagem.urgencia}</span></div>
+                          <div><span className="text-muted-foreground">Tempo alvo:</span> <span className="font-mono">{p.triagem.tempo}</span></div>
+                        </div>
+                        {p.triagem.alertas?.length > 0 && (
+                          <div className="mt-2 text-xs">
+                            <span className="text-muted-foreground">Alertas: </span>
+                            {p.triagem.alertas.join(' · ')}
+                          </div>
+                        )}
+                      </div>
+                    </section>
+                  )}
+
+                  {/* Sinais vitais */}
+                  <section>
+                    <h3 className="font-heading font-bold text-sm mb-2">Sinais vitais</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {[
+                        { label: 'Temperatura', val: p.temperatura, unit: '°C' },
+                        { label: 'Pressão arterial', val: p.pressaoSistolica && p.pressaoDiastolica ? `${p.pressaoSistolica}/${p.pressaoDiastolica}` : undefined, unit: 'mmHg' },
+                        { label: 'Saturação O₂', val: p.saturacaoO2, unit: '%' },
+                        { label: 'Freq. cardíaca', val: p.frequenciaCardiaca, unit: 'bpm' },
+                        { label: 'Glicemia', val: p.glicemia, unit: 'mg/dL' },
+                        { label: 'Freq. respiratória', val: p.frequenciaRespiratoria, unit: 'irpm' },
+                      ].map(s => (
+                        <div key={s.label} className="bg-surface border border-border rounded-lg p-2.5">
+                          <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{s.label}</div>
+                          <div className="text-sm font-mono font-semibold mt-0.5">
+                            {s.val !== undefined && s.val !== '' ? `${s.val} ${s.unit}` : '—'}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  {/* Queixa */}
+                  <section>
+                    <h3 className="font-heading font-bold text-sm mb-2">Queixa e histórico</h3>
+                    <div className="space-y-2 text-sm">
+                      <div><span className="text-muted-foreground">Sintomas: </span>{p.sintomas || '—'}</div>
+                      <div><span className="text-muted-foreground">Alergias: </span>{p.alergia || '—'}</div>
+                      <div><span className="text-muted-foreground">Comorbidades: </span>{p.comorbidade || '—'}</div>
+                    </div>
+                  </section>
+
+                  {/* Médico */}
+                  {p.medicoResponsavel && (
+                    <section>
+                      <h3 className="font-heading font-bold text-sm mb-2">Médico responsável</h3>
+                      <div className="bg-surface border border-border rounded-lg p-3 text-sm">
+                        <div className="font-semibold">{p.medicoResponsavel}</div>
+                        {p.especialidade && <div className="text-xs text-muted-foreground mt-0.5">{p.especialidade}</div>}
+                        {p.prescricao?.dataAtendimento && (
+                          <div className="text-[11px] text-muted-foreground font-mono mt-1">{p.prescricao.dataAtendimento}</div>
+                        )}
+                      </div>
+                    </section>
+                  )}
+
+                  {/* Prescrição */}
+                  {p.prescricao && (
+                    <section>
+                      <h3 className="font-heading font-bold text-sm mb-2">Prescrição médica</h3>
+                      <div className="space-y-2 text-sm">
+                        <div>
+                          <div className="text-xs text-muted-foreground mb-0.5">Diagnóstico</div>
+                          <div className="bg-surface border border-border rounded-lg p-2.5">{p.prescricao.diagnostico || '—'}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-muted-foreground mb-0.5">Medicamentos</div>
+                          <div className="bg-surface border border-border rounded-lg p-2.5 whitespace-pre-wrap">{p.prescricao.medicamentos || '—'}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-muted-foreground mb-0.5">Procedimentos</div>
+                          <div className="bg-surface border border-border rounded-lg p-2.5 whitespace-pre-wrap">{p.prescricao.procedimentos || '—'}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-muted-foreground mb-0.5">Observações</div>
+                          <div className="bg-surface border border-border rounded-lg p-2.5 whitespace-pre-wrap">{p.prescricao.observacoes || '—'}</div>
+                        </div>
+                      </div>
+                    </section>
+                  )}
+                </div>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
