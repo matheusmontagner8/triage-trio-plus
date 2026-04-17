@@ -48,12 +48,6 @@ export interface UserSession {
 export const ESPECIALIDADES = [
   { id: 'clinica', nome: 'Clínica Médica', desc: 'Atendimento geral e integral' },
   { id: 'pediatria', nome: 'Pediatria', desc: 'Saúde de crianças e adolescentes' },
-  { id: 'cirurgia', nome: 'Cirurgia Geral', desc: 'Procedimentos cirúrgicos' },
-  { id: 'ginecologia', nome: 'Ginecologia e Obstetrícia', desc: 'Saúde reprodutiva e gestação' },
-  { id: 'anestesiologia', nome: 'Anestesiologia', desc: 'Controle da dor e suporte vital' },
-  { id: 'cardiologia', nome: 'Cardiologia', desc: 'Doenças do coração e vasos' },
-  { id: 'dermatologia', nome: 'Dermatologia', desc: 'Doenças da pele, cabelos e unhas' },
-  { id: 'neurologia', nome: 'Neurologia', desc: 'Distúrbios do sistema nervoso' },
 ];
 
 export function getFichas(): Record<string, Paciente> {
