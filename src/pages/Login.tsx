@@ -14,17 +14,36 @@ const FUNCIONARIOS_MEDICOS = [
   'Dra. Camila Ferreira',
 ];
 
+const SENHAS: Record<string, string> = {
+  'Ana Santos': '1111',
+  'Carlos Oliveira': '2222',
+  'Mariana Silva': '3333',
+  'Dr. Ricardo Mendes': '4444',
+  'Dra. Fernanda Costa': '5555',
+  'Dr. Paulo Almeida': '6666',
+  'Dra. Juliana Rocha': '7777',
+  'Dr. André Barbosa': '8888',
+  'Dra. Camila Ferreira': '9999',
+};
+
 type Role = 'recepcao' | 'enfermagem' | 'medico';
 
 const Login = () => {
   const [role, setRole] = useState<Role | null>(null);
   const [nome, setNome] = useState('');
   const [especialidade, setEspecialidade] = useState('');
+  const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = () => {
     if (!role || !nome) return;
     if (role === 'medico' && !especialidade) return;
+    if (SENHAS[nome] !== senha) {
+      setErro('Senha incorreta. Tente novamente.');
+      return;
+    }
+    setErro('');
     setSession({ role, nome, especialidade: role === 'medico' ? especialidade : undefined });
     if (role === 'recepcao') navigate('/recepcao');
     else if (role === 'enfermagem') navigate('/enfermagem');
@@ -66,7 +85,7 @@ const Login = () => {
           {roles.map((r) => (
             <button
               key={r.id}
-              onClick={() => { setRole(r.id); setNome(''); setEspecialidade(''); }}
+              onClick={() => { setRole(r.id); setNome(''); setEspecialidade(''); setSenha(''); setErro(''); }}
               className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
                 role === r.id
                   ? 'border-primary bg-primary/5'
@@ -89,7 +108,7 @@ const Login = () => {
             </div>
             <select
               value={nome}
-              onChange={(e) => setNome(e.target.value)}
+              onChange={(e) => { setNome(e.target.value); setSenha(''); setErro(''); }}
               className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary mb-4"
             >
               <option value="">Selecione seu nome</option>
@@ -122,9 +141,28 @@ const Login = () => {
               </>
             )}
 
+            {nome && (role !== 'medico' || especialidade) && (
+              <>
+                <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-3 flex items-center gap-2">
+                  Senha (4 dígitos) <span className="flex-1 h-px bg-border" />
+                </div>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={senha}
+                  onChange={(e) => { setSenha(e.target.value.replace(/\D/g, '')); setErro(''); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}
+                  placeholder="••••"
+                  className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary mb-2 tracking-[0.5em] text-center"
+                />
+                {erro && <p className="text-xs text-destructive mb-2">{erro}</p>}
+              </>
+            )}
+
             <button
               onClick={handleLogin}
-              disabled={!nome || (role === 'medico' && !especialidade)}
+              disabled={!nome || (role === 'medico' && !especialidade) || senha.length !== 4}
               className="w-full bg-primary text-primary-foreground rounded-[10px] py-3.5 text-sm font-semibold font-heading disabled:opacity-40 transition-opacity hover:opacity-90 mt-2"
             >
               Entrar no sistema
