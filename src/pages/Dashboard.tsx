@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [busca, setBusca] = useState('');
   const [filtroCor, setFiltroCor] = useState<string>('TODOS');
   const [filtroPeriodo, setFiltroPeriodo] = useState<'TODOS' | 'HOJE' | 'SEMANA' | 'MES'>('TODOS');
+  const [pacienteSelecionado, setPacienteSelecionado] = useState<Paciente | null>(null);
 
   // Parse pt-BR date "dd/mm/yyyy, hh:mm:ss" to Date
   const parsePtDate = (s?: string): Date | null => {
