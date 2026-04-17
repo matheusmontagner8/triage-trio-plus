@@ -108,9 +108,9 @@ const Login = () => {
             </div>
             <select
               value={nome}
-              onChange={(e) => setNome(e.target.value)}
+              onChange={(e) => { setNome(e.target.value); setSenha(''); setErro(''); }}
               className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary mb-4"
-            >
+            ></select>
               <option value="">Selecione seu nome</option>
               {getNomes().map((n) => (
                 <option key={n} value={n}>{n}</option>
