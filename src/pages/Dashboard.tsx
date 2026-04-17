@@ -270,7 +270,11 @@ const Dashboard = () => {
               {historicoFiltrado.map(p => {
                 const c = p.triagem ? COLOR_LABELS[p.triagem.cor] || COLOR_LABELS.VERDE : COLOR_LABELS.VERDE;
                 return (
-                  <div key={p.codigo} className={`p-3 rounded-xl border ${c.border} ${c.bg}`}>
+                  <button
+                    key={p.codigo}
+                    onClick={() => setPacienteSelecionado(p)}
+                    className={`w-full text-left p-3 rounded-xl border ${c.border} ${c.bg} hover:opacity-90 hover:shadow-sm transition-all cursor-pointer`}
+                  >
                     <div className="flex items-start gap-3">
                       <div className={`w-3 h-3 rounded-full ${c.dot} shrink-0 mt-1.5`} />
                       <div className="flex-1 min-w-0">
@@ -297,7 +301,7 @@ const Dashboard = () => {
                         {p.prescricao?.dataAtendimento || '—'}
                       </div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
