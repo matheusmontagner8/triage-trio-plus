@@ -141,9 +141,28 @@ const Login = () => {
               </>
             )}
 
+            {nome && (role !== 'medico' || especialidade) && (
+              <>
+                <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-3 flex items-center gap-2">
+                  Senha (4 dígitos) <span className="flex-1 h-px bg-border" />
+                </div>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={senha}
+                  onChange={(e) => { setSenha(e.target.value.replace(/\D/g, '')); setErro(''); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}
+                  placeholder="••••"
+                  className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary mb-2 tracking-[0.5em] text-center"
+                />
+                {erro && <p className="text-xs text-destructive mb-2">{erro}</p>}
+              </>
+            )}
+
             <button
               onClick={handleLogin}
-              disabled={!nome || (role === 'medico' && !especialidade)}
+              disabled={!nome || (role === 'medico' && !especialidade) || senha.length !== 4}
               className="w-full bg-primary text-primary-foreground rounded-[10px] py-3.5 text-sm font-semibold font-heading disabled:opacity-40 transition-opacity hover:opacity-90 mt-2"
             >
               Entrar no sistema
