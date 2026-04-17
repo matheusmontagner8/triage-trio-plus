@@ -85,7 +85,7 @@ const Login = () => {
           {roles.map((r) => (
             <button
               key={r.id}
-              onClick={() => { setRole(r.id); setNome(''); setEspecialidade(''); }}
+              onClick={() => { setRole(r.id); setNome(''); setEspecialidade(''); setSenha(''); setErro(''); }}
               className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
                 role === r.id
                   ? 'border-primary bg-primary/5'
