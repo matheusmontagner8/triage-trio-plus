@@ -14,6 +14,18 @@ const FUNCIONARIOS_MEDICOS = [
   'Dra. Camila Ferreira',
 ];
 
+const SENHAS: Record<string, string> = {
+  'Ana Santos': '1111',
+  'Carlos Oliveira': '2222',
+  'Mariana Silva': '3333',
+  'Dr. Ricardo Mendes': '4444',
+  'Dra. Fernanda Costa': '5555',
+  'Dr. Paulo Almeida': '6666',
+  'Dra. Juliana Rocha': '7777',
+  'Dr. André Barbosa': '8888',
+  'Dra. Camila Ferreira': '9999',
+};
+
 type Role = 'recepcao' | 'enfermagem' | 'medico';
 
 const Login = () => {
