@@ -20,9 +20,12 @@ const Medico = () => {
   const [fila, setFila] = useState<Paciente[]>([]);
   const [atendendo, setAtendendo] = useState(false);
   const [diagnostico, setDiagnostico] = useState('');
+  const [cid, setCid] = useState('');
   const [medicamentos, setMedicamentos] = useState('');
   const [procedimentos, setProcedimentos] = useState('');
   const [observacoes, setObservacoes] = useState('');
+
+  const cidOptions = CID_POR_ESPECIALIDADE[session?.especialidade || ''] || [];
 
   useEffect(() => {
     if (!session || session.role !== 'medico') {
