@@ -295,6 +295,12 @@ const Dashboard = () => {
                             <span className="font-medium">{p.prescricao.diagnostico}</span>
                           </div>
                         )}
+                        {p.prescricao?.cid && (
+                          <div className="text-xs mt-0.5">
+                            <span className="text-muted-foreground">CID-10: </span>
+                            <span className="font-mono font-medium">{p.prescricao.cid}</span>
+                          </div>
+                        )}
                         {p.medicoResponsavel && (
                           <div className="text-[11px] text-muted-foreground mt-0.5">
                             Atendido por {p.medicoResponsavel}
