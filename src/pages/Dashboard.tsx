@@ -409,6 +409,12 @@ const Dashboard = () => {
                     <section>
                       <h3 className="font-heading font-bold text-sm mb-2">Prescrição médica</h3>
                       <div className="space-y-2 text-sm">
+                        {p.prescricao?.cid && (
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-0.5">CID-10</div>
+                            <div className="bg-surface border border-border rounded-lg p-2.5 font-mono">{p.prescricao.cid}</div>
+                          </div>
+                        )}
                         <div>
                           <div className="text-xs text-muted-foreground mb-0.5">Diagnóstico</div>
                           <div className="bg-surface border border-border rounded-lg p-2.5">{p.prescricao.diagnostico || '—'}</div>
