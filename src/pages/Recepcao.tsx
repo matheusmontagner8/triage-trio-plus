@@ -54,9 +54,14 @@ const Recepcao = () => {
       <div className="bg-card border border-border rounded-[20px] p-12 w-full max-w-[600px]">
         <div className="flex items-center justify-between mb-7">
           <Logo subtitle="Recepção" />
-          <button onClick={() => { clearSession(); navigate('/'); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-            Sair ({session.nome})
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate('/dashboard')} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              📊 Histórico
+            </button>
+            <button onClick={() => { clearSession(); navigate('/'); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              Sair ({session.nome})
+            </button>
+          </div>
         </div>
 
         <h1 className="font-heading text-[26px] font-extrabold mb-1.5">Ficha do Paciente</h1>

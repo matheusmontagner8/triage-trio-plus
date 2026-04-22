@@ -152,6 +152,7 @@ const Medico = () => {
         <div className="mt-auto text-[10px] text-muted-foreground leading-relaxed">
           Sistema de apoio à triagem.<br />Não substitui avaliação clínica presencial.
           <br />
+          <button onClick={() => navigate('/dashboard')} className="text-primary hover:underline mt-2 inline-block mr-3">📊 Histórico</button>
           <button onClick={() => { clearSession(); navigate('/'); }} className="text-primary hover:underline mt-2 inline-block">Sair</button>
         </div>
       </aside>
