@@ -80,7 +80,14 @@ const Medico = () => {
     const p = fichaFinalizada;
     const w = window.open('', '_blank');
     if (!w) return;
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Prescrição - ${p.nome}</title>
+    const esc = (s: unknown) =>
+      String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Prescrição - ${esc(p.nome)}</title>
     <style>
       body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;color:#222;font-size:14px}
       h1{font-size:20px;margin-bottom:4px} h2{font-size:15px;color:#555;margin:20px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}
@@ -94,30 +101,30 @@ const Medico = () => {
     </style></head><body>
     <div class="header">
       <h1>TriageEngine — Prescrição Médica</h1>
-      <div style="font-size:12px;color:#666">Data: ${p.prescricao?.dataAtendimento}</div>
+      <div style="font-size:12px;color:#666">Data: ${esc(p.prescricao?.dataAtendimento)}</div>
     </div>
     <h2>Dados do Paciente</h2>
     <div class="grid">
-      <div class="field"><div class="label">Nome</div><div class="value">${p.nome}</div></div>
-      <div class="field"><div class="label">Código</div><div class="value">${p.codigo}</div></div>
-      <div class="field"><div class="label">Idade</div><div class="value">${p.idade} anos</div></div>
-      <div class="field"><div class="label">Classificação</div><div class="value">${p.triagem?.cor} — ${p.triagem?.urgencia}</div></div>
+      <div class="field"><div class="label">Nome</div><div class="value">${esc(p.nome)}</div></div>
+      <div class="field"><div class="label">Código</div><div class="value">${esc(p.codigo)}</div></div>
+      <div class="field"><div class="label">Idade</div><div class="value">${esc(p.idade)} anos</div></div>
+      <div class="field"><div class="label">Classificação</div><div class="value">${esc(p.triagem?.cor)} — ${esc(p.triagem?.urgencia)}</div></div>
     </div>
     <h2>Sinais Vitais</h2>
     <div class="grid">
-      <div class="field"><div class="label">Temperatura</div><div class="value">${p.temperatura}°C</div></div>
-      <div class="field"><div class="label">Pressão arterial</div><div class="value">${p.pressaoSistolica}/${p.pressaoDiastolica} mmHg</div></div>
-      <div class="field"><div class="label">Saturação O₂</div><div class="value">${p.saturacaoO2}%</div></div>
-      <div class="field"><div class="label">Freq. cardíaca</div><div class="value">${p.frequenciaCardiaca} bpm</div></div>
-      <div class="field"><div class="label">Glicemia</div><div class="value">${p.glicemia} mg/dL</div></div>
-      <div class="field"><div class="label">Freq. respiratória</div><div class="value">${p.frequenciaRespiratoria} irpm</div></div>
+      <div class="field"><div class="label">Temperatura</div><div class="value">${esc(p.temperatura)}°C</div></div>
+      <div class="field"><div class="label">Pressão arterial</div><div class="value">${esc(p.pressaoSistolica)}/${esc(p.pressaoDiastolica)} mmHg</div></div>
+      <div class="field"><div class="label">Saturação O₂</div><div class="value">${esc(p.saturacaoO2)}%</div></div>
+      <div class="field"><div class="label">Freq. cardíaca</div><div class="value">${esc(p.frequenciaCardiaca)} bpm</div></div>
+      <div class="field"><div class="label">Glicemia</div><div class="value">${esc(p.glicemia)} mg/dL</div></div>
+      <div class="field"><div class="label">Freq. respiratória</div><div class="value">${esc(p.frequenciaRespiratoria)} irpm</div></div>
     </div>
     <h2>Prescrição</h2>
-    <div class="rx"><div class="label">Diagnóstico</div><div class="value">${p.prescricao?.diagnostico || '—'}</div></div>
-    <div class="rx"><div class="label">Medicamentos</div><div class="value">${p.prescricao?.medicamentos || '—'}</div></div>
-    <div class="rx"><div class="label">Procedimentos</div><div class="value">${p.prescricao?.procedimentos || '—'}</div></div>
-    <div class="rx"><div class="label">Observações</div><div class="value">${p.prescricao?.observacoes || '—'}</div></div>
-    <div class="sig"><div class="sig-line">${p.medicoResponsavel || session?.nome}<br/><span style="font-size:11px;color:#888">${session?.especialidade || ''}</span></div></div>
+    <div class="rx"><div class="label">Diagnóstico</div><div class="value">${esc(p.prescricao?.diagnostico) || '—'}</div></div>
+    <div class="rx"><div class="label">Medicamentos</div><div class="value">${esc(p.prescricao?.medicamentos) || '—'}</div></div>
+    <div class="rx"><div class="label">Procedimentos</div><div class="value">${esc(p.prescricao?.procedimentos) || '—'}</div></div>
+    <div class="rx"><div class="label">Observações</div><div class="value">${esc(p.prescricao?.observacoes) || '—'}</div></div>
+    <div class="sig"><div class="sig-line">${esc(p.medicoResponsavel || session?.nome)}<br/><span style="font-size:11px;color:#888">${esc(session?.especialidade || '')}</span></div></div>
     <div class="footer">Documento gerado pelo sistema TriageEngine — Protocolo de Manchester<br/>Este documento não substitui a avaliação clínica presencial.</div>
     </body></html>`);
     w.document.close();
