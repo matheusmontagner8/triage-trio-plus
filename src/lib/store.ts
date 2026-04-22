@@ -30,6 +30,7 @@ export interface Paciente {
   medicoResponsavel?: string;
   // Prescription
   prescricao?: {
+    cid?: string;
     diagnostico: string;
     medicamentos: string;
     procedimentos: string;
