@@ -30,6 +30,7 @@ export interface Paciente {
   medicoResponsavel?: string;
   // Prescription
   prescricao?: {
+    cid?: string;
     diagnostico: string;
     medicamentos: string;
     procedimentos: string;
@@ -49,6 +50,38 @@ export const ESPECIALIDADES = [
   { id: 'clinica', nome: 'Clínica Médica', desc: 'Atendimento geral e integral' },
   { id: 'pediatria', nome: 'Pediatria', desc: 'Saúde de crianças e adolescentes' },
 ];
+
+export const CID_POR_ESPECIALIDADE: Record<string, { codigo: string; descricao: string }[]> = {
+  'Clínica Médica': [
+    { codigo: 'I10', descricao: 'Hipertensão essencial (primária)' },
+    { codigo: 'E11', descricao: 'Diabetes mellitus tipo 2' },
+    { codigo: 'J06.9', descricao: 'Infecção aguda das vias aéreas superiores' },
+    { codigo: 'J11', descricao: 'Influenza (gripe)' },
+    { codigo: 'J18', descricao: 'Pneumonia não especificada' },
+    { codigo: 'K29', descricao: 'Gastrite e duodenite' },
+    { codigo: 'K52.9', descricao: 'Gastroenterite e colite não infecciosas' },
+    { codigo: 'N39.0', descricao: 'Infecção do trato urinário' },
+    { codigo: 'R10.4', descricao: 'Dor abdominal não especificada' },
+    { codigo: 'R51', descricao: 'Cefaleia' },
+    { codigo: 'R50.9', descricao: 'Febre não especificada' },
+    { codigo: 'M54.5', descricao: 'Dor lombar baixa' },
+  ],
+  'Pediatria': [
+    { codigo: 'J00', descricao: 'Nasofaringite aguda (resfriado comum)' },
+    { codigo: 'J03.9', descricao: 'Amigdalite aguda' },
+    { codigo: 'J06.9', descricao: 'Infecção aguda das vias aéreas superiores' },
+    { codigo: 'J21', descricao: 'Bronquiolite aguda' },
+    { codigo: 'H66.9', descricao: 'Otite média não especificada' },
+    { codigo: 'A09', descricao: 'Diarreia e gastroenterite (origem infecciosa)' },
+    { codigo: 'B01', descricao: 'Varicela' },
+    { codigo: 'B05', descricao: 'Sarampo' },
+    { codigo: 'B08.4', descricao: 'Exantema viral' },
+    { codigo: 'L20', descricao: 'Dermatite atópica' },
+    { codigo: 'R50.9', descricao: 'Febre não especificada' },
+    { codigo: 'R11', descricao: 'Náusea e vômito' },
+  ],
+};
+
 
 export function getFichas(): Record<string, Paciente> {
   return JSON.parse(localStorage.getItem('triagem_fichas') || '{}');

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import TriageProtocol from '@/components/TriageProtocol';
-import { getAllPacientes, updateFicha, getSession, clearSession, type Paciente } from '@/lib/store';
+import { getAllPacientes, updateFicha, getSession, clearSession, CID_POR_ESPECIALIDADE, type Paciente } from '@/lib/store';
 
 const COLOR_MAP: Record<string, { dot: string; bg: string; border: string; text: string }> = {
   VERMELHO: { dot: 'bg-triage-red', bg: 'bg-triage-red-bg', border: 'border-triage-red-border', text: 'text-triage-red' },
@@ -20,9 +20,12 @@ const Medico = () => {
   const [fila, setFila] = useState<Paciente[]>([]);
   const [atendendo, setAtendendo] = useState(false);
   const [diagnostico, setDiagnostico] = useState('');
+  const [cid, setCid] = useState('');
   const [medicamentos, setMedicamentos] = useState('');
   const [procedimentos, setProcedimentos] = useState('');
   const [observacoes, setObservacoes] = useState('');
+
+  const cidOptions = CID_POR_ESPECIALIDADE[session?.especialidade || ''] || [];
 
   useEffect(() => {
     if (!session || session.role !== 'medico') {
@@ -57,6 +60,7 @@ const Medico = () => {
   const finalizarAtendimento = () => {
     if (ficha && diagnostico.trim()) {
       const prescricaoData = {
+        cid,
         diagnostico,
         medicamentos,
         procedimentos,
@@ -69,6 +73,7 @@ const Medico = () => {
     setFicha(null);
     setAtendendo(false);
     setDiagnostico('');
+    setCid('');
     setMedicamentos('');
     setProcedimentos('');
     setObservacoes('');
@@ -120,6 +125,7 @@ const Medico = () => {
       <div class="field"><div class="label">Freq. respiratória</div><div class="value">${esc(p.frequenciaRespiratoria)} irpm</div></div>
     </div>
     <h2>Prescrição</h2>
+    <div class="rx"><div class="label">CID-10</div><div class="value"><strong>${esc(p.prescricao?.cid) || '—'}</strong></div></div>
     <div class="rx"><div class="label">Diagnóstico</div><div class="value">${esc(p.prescricao?.diagnostico) || '—'}</div></div>
     <div class="rx"><div class="label">Medicamentos</div><div class="value">${esc(p.prescricao?.medicamentos) || '—'}</div></div>
     <div class="rx"><div class="label">Procedimentos</div><div class="value">${esc(p.prescricao?.procedimentos) || '—'}</div></div>
@@ -307,6 +313,26 @@ const Medico = () => {
                   placeholder="Descreva o diagnóstico do paciente..."
                   className="w-full bg-surface2 border border-border rounded-[10px] p-3 text-sm min-h-[70px] resize-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
                 />
+              </div>
+              <div>
+                <label className="text-[11px] text-muted-foreground mb-1 block">
+                  CID-10 ({session.especialidade})
+                </label>
+                <input
+                  list="cid-options"
+                  value={cid}
+                  onChange={e => setCid(e.target.value)}
+                  placeholder="Ex: J06.9 — selecione ou digite o código"
+                  className="w-full bg-surface2 border border-border rounded-[10px] p-3 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+                />
+                <datalist id="cid-options">
+                  {cidOptions.map(c => (
+                    <option key={c.codigo} value={`${c.codigo} — ${c.descricao}`} />
+                  ))}
+                </datalist>
+                <div className="text-[10px] text-muted-foreground mt-1">
+                  Sugestões frequentes em {session.especialidade} — você pode digitar outro código.
+                </div>
               </div>
               <div>
                 <label className="text-[11px] text-muted-foreground mb-1 block">Medicamentos prescritos</label>
