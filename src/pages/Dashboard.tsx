@@ -107,7 +107,7 @@ const Dashboard = () => {
     return atendidos
       .filter(p => filtroCor === 'TODOS' || p.triagem?.cor === filtroCor)
       .filter(p => dentroDoPeriodo(p.prescricao?.dataAtendimento))
-      .filter(p => !q || p.nome.toLowerCase().includes(q) || p.codigo.toLowerCase().includes(q) || p.prescricao?.diagnostico?.toLowerCase().includes(q))
+      .filter(p => !q || p.nome.toLowerCase().includes(q) || p.codigo.toLowerCase().includes(q) || p.prescricao?.diagnostico?.toLowerCase().includes(q) || p.prescricao?.cid?.toLowerCase().includes(q))
       .sort((a, b) => (b.prescricao?.dataAtendimento || '').localeCompare(a.prescricao?.dataAtendimento || ''));
   }, [atendidos, busca, filtroCor, filtroPeriodo]);
 
@@ -295,6 +295,12 @@ const Dashboard = () => {
                             <span className="font-medium">{p.prescricao.diagnostico}</span>
                           </div>
                         )}
+                        {p.prescricao?.cid && (
+                          <div className="text-xs mt-0.5">
+                            <span className="text-muted-foreground">CID-10: </span>
+                            <span className="font-mono font-medium">{p.prescricao.cid}</span>
+                          </div>
+                        )}
                         {p.medicoResponsavel && (
                           <div className="text-[11px] text-muted-foreground mt-0.5">
                             Atendido por {p.medicoResponsavel}
@@ -403,6 +409,12 @@ const Dashboard = () => {
                     <section>
                       <h3 className="font-heading font-bold text-sm mb-2">Prescrição médica</h3>
                       <div className="space-y-2 text-sm">
+                        {p.prescricao?.cid && (
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-0.5">CID-10</div>
+                            <div className="bg-surface border border-border rounded-lg p-2.5 font-mono">{p.prescricao.cid}</div>
+                          </div>
+                        )}
                         <div>
                           <div className="text-xs text-muted-foreground mb-0.5">Diagnóstico</div>
                           <div className="bg-surface border border-border rounded-lg p-2.5">{p.prescricao.diagnostico || '—'}</div>
