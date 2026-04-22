@@ -107,7 +107,7 @@ const Dashboard = () => {
     return atendidos
       .filter(p => filtroCor === 'TODOS' || p.triagem?.cor === filtroCor)
       .filter(p => dentroDoPeriodo(p.prescricao?.dataAtendimento))
-      .filter(p => !q || p.nome.toLowerCase().includes(q) || p.codigo.toLowerCase().includes(q) || p.prescricao?.diagnostico?.toLowerCase().includes(q))
+      .filter(p => !q || p.nome.toLowerCase().includes(q) || p.codigo.toLowerCase().includes(q) || p.prescricao?.diagnostico?.toLowerCase().includes(q) || p.prescricao?.cid?.toLowerCase().includes(q))
       .sort((a, b) => (b.prescricao?.dataAtendimento || '').localeCompare(a.prescricao?.dataAtendimento || ''));
   }, [atendidos, busca, filtroCor, filtroPeriodo]);
 
