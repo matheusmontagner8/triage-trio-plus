@@ -70,12 +70,6 @@ const Login = () => {
         </div>
         <h1 className="font-heading text-2xl font-extrabold mb-1.5">Acesso ao Sistema</h1>
         <p className="text-sm text-muted-foreground mb-6">Selecione seu setor e identifique-se para continuar.</p>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="w-full border border-border bg-surface2 rounded-[10px] py-3 text-sm font-semibold hover:border-primary/50 transition-colors mb-6 flex items-center justify-center gap-2"
-        >
-          📊 Dashboard de Atendimento
-        </button>
 
         {/* Role selection */}
         <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-3 flex items-center gap-2">

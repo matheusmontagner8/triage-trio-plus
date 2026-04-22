@@ -20,6 +20,7 @@ const Dashboard = () => {
     if (!session) navigate('/login', { replace: true });
   }, [session, navigate]);
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
+  if (!session) return null;
   const [busca, setBusca] = useState('');
   const [filtroCor, setFiltroCor] = useState<string>('TODOS');
   const [filtroPeriodo, setFiltroPeriodo] = useState<'TODOS' | 'HOJE' | 'SEMANA' | 'MES'>('TODOS');
