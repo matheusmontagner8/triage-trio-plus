@@ -315,6 +315,26 @@ const Medico = () => {
                 />
               </div>
               <div>
+                <label className="text-[11px] text-muted-foreground mb-1 block">
+                  CID-10 ({session.especialidade})
+                </label>
+                <input
+                  list="cid-options"
+                  value={cid}
+                  onChange={e => setCid(e.target.value)}
+                  placeholder="Ex: J06.9 — selecione ou digite o código"
+                  className="w-full bg-surface2 border border-border rounded-[10px] p-3 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+                />
+                <datalist id="cid-options">
+                  {cidOptions.map(c => (
+                    <option key={c.codigo} value={`${c.codigo} — ${c.descricao}`} />
+                  ))}
+                </datalist>
+                <div className="text-[10px] text-muted-foreground mt-1">
+                  Sugestões frequentes em {session.especialidade} — você pode digitar outro código.
+                </div>
+              </div>
+              <div>
                 <label className="text-[11px] text-muted-foreground mb-1 block">Medicamentos prescritos</label>
                 <textarea
                   value={medicamentos}
