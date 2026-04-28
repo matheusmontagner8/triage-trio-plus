@@ -129,6 +129,7 @@ const Medico = () => {
     </div>
     <h2>Prescrição</h2>
     <div class="rx"><div class="label">CID-10</div><div class="value"><strong>${esc(p.prescricao?.cid) || '—'}</strong></div></div>
+    <div class="rx"><div class="label">Tempo com os sintomas</div><div class="value">${esc(p.prescricao?.tempoSintomas) || '—'}</div></div>
     <div class="rx"><div class="label">Diagnóstico</div><div class="value">${esc(p.prescricao?.diagnostico) || '—'}</div></div>
     <div class="rx"><div class="label">Medicamentos</div><div class="value">${esc(p.prescricao?.medicamentos) || '—'}</div></div>
     <div class="rx"><div class="label">Procedimentos</div><div class="value">${esc(p.prescricao?.procedimentos) || '—'}</div></div>
