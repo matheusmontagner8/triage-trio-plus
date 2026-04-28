@@ -310,6 +310,18 @@ const Medico = () => {
             </div>
             <div className="space-y-3 mb-5">
               <div>
+                <label className="text-[11px] text-muted-foreground mb-1 block">Tempo com os sintomas</label>
+                <input
+                  value={tempoSintomas}
+                  onChange={e => setTempoSintomas(e.target.value)}
+                  placeholder="Ex: 3 dias, 12 horas, 1 semana..."
+                  className="w-full bg-surface2 border border-border rounded-[10px] p-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+                />
+                <div className="text-[10px] text-muted-foreground mt-1">
+                  Informe há quanto tempo o paciente apresenta os sintomas relatados.
+                </div>
+              </div>
+              <div>
                 <label className="text-[11px] text-muted-foreground mb-1 block">Diagnóstico *</label>
                 <textarea
                   value={diagnostico}
