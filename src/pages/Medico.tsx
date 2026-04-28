@@ -21,6 +21,7 @@ const Medico = () => {
   const [atendendo, setAtendendo] = useState(false);
   const [diagnostico, setDiagnostico] = useState('');
   const [cid, setCid] = useState('');
+  const [tempoSintomas, setTempoSintomas] = useState('');
   const [medicamentos, setMedicamentos] = useState('');
   const [procedimentos, setProcedimentos] = useState('');
   const [observacoes, setObservacoes] = useState('');
