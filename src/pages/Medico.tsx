@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import TriageProtocol from '@/components/TriageProtocol';
-import { getAllPacientes, updateFicha, getSession, clearSession, CID_POR_ESPECIALIDADE, type Paciente } from '@/lib/store';
+import { getAllPacientes, updateFicha, getSession, clearSession, CID_POR_ESPECIALIDADE, verificarContraindicacoes, detectarComorbidades, type Paciente } from '@/lib/store';
+import { toast } from 'sonner';
 
 const COLOR_MAP: Record<string, { dot: string; bg: string; border: string; text: string }> = {
   VERMELHO: { dot: 'bg-triage-red', bg: 'bg-triage-red-bg', border: 'border-triage-red-border', text: 'text-triage-red' },
