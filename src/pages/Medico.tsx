@@ -59,7 +59,16 @@ const Medico = () => {
 
   const [fichaFinalizada, setFichaFinalizada] = useState<Paciente | null>(null);
 
+  const alertasContraindicacao = ficha
+    ? verificarContraindicacoes(ficha.comorbidade, medicamentos)
+    : [];
+  const comorbidadesDetectadas = ficha ? detectarComorbidades(ficha.comorbidade) : [];
+
   const finalizarAtendimento = () => {
+    if (alertasContraindicacao.length > 0) {
+      toast.error('Há medicamentos contraindicados para a comorbidade do paciente. Remova-os antes de finalizar.');
+      return;
+    }
     if (ficha && diagnostico.trim()) {
       const prescricaoData = {
         cid,
