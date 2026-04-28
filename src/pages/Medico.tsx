@@ -62,6 +62,7 @@ const Medico = () => {
     if (ficha && diagnostico.trim()) {
       const prescricaoData = {
         cid,
+        tempoSintomas,
         diagnostico,
         medicamentos,
         procedimentos,
@@ -75,6 +76,7 @@ const Medico = () => {
     setAtendendo(false);
     setDiagnostico('');
     setCid('');
+    setTempoSintomas('');
     setMedicamentos('');
     setProcedimentos('');
     setObservacoes('');
