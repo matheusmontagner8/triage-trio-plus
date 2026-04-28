@@ -362,12 +362,37 @@ const Medico = () => {
               </div>
               <div>
                 <label className="text-[11px] text-muted-foreground mb-1 block">Medicamentos prescritos</label>
+                {comorbidadesDetectadas.length > 0 && (
+                  <div className="mb-2 bg-triage-yellow-bg border border-triage-yellow-border rounded-[10px] p-2.5 text-[11px]">
+                    <div className="font-semibold text-triage-yellow mb-1">
+                      ⚠ Comorbidades detectadas: {comorbidadesDetectadas.map(c => c.comorbidade).join(', ')}
+                    </div>
+                    <div className="text-muted-foreground">
+                      O sistema verifica automaticamente medicamentos contraindicados.
+                    </div>
+                  </div>
+                )}
                 <textarea
                   value={medicamentos}
                   onChange={e => setMedicamentos(e.target.value)}
                   placeholder="Ex: Dipirona 500mg — 1 comp. de 6/6h por 3 dias..."
-                  className="w-full bg-surface2 border border-border rounded-[10px] p-3 text-sm min-h-[70px] resize-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+                  className={`w-full bg-surface2 border rounded-[10px] p-3 text-sm min-h-[70px] resize-none focus:outline-none focus:ring-1 placeholder:text-muted-foreground ${alertasContraindicacao.length > 0 ? 'border-triage-red-border focus:ring-triage-red' : 'border-border focus:ring-primary'}`}
                 />
+                {alertasContraindicacao.length > 0 && (
+                  <div className="mt-2 bg-triage-red-bg border border-triage-red-border rounded-[10px] p-3 text-[12px]">
+                    <div className="font-bold text-triage-red mb-1.5">
+                      🚫 Medicamentos contraindicados — não é possível finalizar
+                    </div>
+                    <ul className="space-y-1 text-triage-red">
+                      {alertasContraindicacao.map((a, i) => (
+                        <li key={i}>
+                          <strong className="capitalize">{a.medicamento}</strong> — {a.motivo}{' '}
+                          <span className="text-muted-foreground">({a.comorbidade})</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="text-[11px] text-muted-foreground mb-1 block">Procedimentos realizados / solicitados</label>
