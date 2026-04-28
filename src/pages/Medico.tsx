@@ -21,6 +21,7 @@ const Medico = () => {
   const [atendendo, setAtendendo] = useState(false);
   const [diagnostico, setDiagnostico] = useState('');
   const [cid, setCid] = useState('');
+  const [tempoSintomas, setTempoSintomas] = useState('');
   const [medicamentos, setMedicamentos] = useState('');
   const [procedimentos, setProcedimentos] = useState('');
   const [observacoes, setObservacoes] = useState('');
@@ -61,6 +62,7 @@ const Medico = () => {
     if (ficha && diagnostico.trim()) {
       const prescricaoData = {
         cid,
+        tempoSintomas,
         diagnostico,
         medicamentos,
         procedimentos,
@@ -74,6 +76,7 @@ const Medico = () => {
     setAtendendo(false);
     setDiagnostico('');
     setCid('');
+    setTempoSintomas('');
     setMedicamentos('');
     setProcedimentos('');
     setObservacoes('');
@@ -126,6 +129,7 @@ const Medico = () => {
     </div>
     <h2>Prescrição</h2>
     <div class="rx"><div class="label">CID-10</div><div class="value"><strong>${esc(p.prescricao?.cid) || '—'}</strong></div></div>
+    <div class="rx"><div class="label">Tempo com os sintomas</div><div class="value">${esc(p.prescricao?.tempoSintomas) || '—'}</div></div>
     <div class="rx"><div class="label">Diagnóstico</div><div class="value">${esc(p.prescricao?.diagnostico) || '—'}</div></div>
     <div class="rx"><div class="label">Medicamentos</div><div class="value">${esc(p.prescricao?.medicamentos) || '—'}</div></div>
     <div class="rx"><div class="label">Procedimentos</div><div class="value">${esc(p.prescricao?.procedimentos) || '—'}</div></div>
@@ -305,6 +309,18 @@ const Medico = () => {
               Prescrição médica <span className="flex-1 h-px bg-border" />
             </div>
             <div className="space-y-3 mb-5">
+              <div>
+                <label className="text-[11px] text-muted-foreground mb-1 block">Tempo com os sintomas</label>
+                <input
+                  value={tempoSintomas}
+                  onChange={e => setTempoSintomas(e.target.value)}
+                  placeholder="Ex: 3 dias, 12 horas, 1 semana..."
+                  className="w-full bg-surface2 border border-border rounded-[10px] p-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+                />
+                <div className="text-[10px] text-muted-foreground mt-1">
+                  Informe há quanto tempo o paciente apresenta os sintomas relatados.
+                </div>
+              </div>
               <div>
                 <label className="text-[11px] text-muted-foreground mb-1 block">Diagnóstico *</label>
                 <textarea

@@ -31,6 +31,7 @@ export interface Paciente {
   // Prescription
   prescricao?: {
     cid?: string;
+    tempoSintomas?: string;
     diagnostico: string;
     medicamentos: string;
     procedimentos: string;
