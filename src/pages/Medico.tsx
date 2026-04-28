@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import TriageProtocol from '@/components/TriageProtocol';
-import { getAllPacientes, updateFicha, getSession, clearSession, CID_POR_ESPECIALIDADE, type Paciente } from '@/lib/store';
+import { getAllPacientes, updateFicha, getSession, clearSession, CID_POR_ESPECIALIDADE, verificarContraindicacoes, detectarComorbidades, type Paciente } from '@/lib/store';
+import { toast } from 'sonner';
 
 const COLOR_MAP: Record<string, { dot: string; bg: string; border: string; text: string }> = {
   VERMELHO: { dot: 'bg-triage-red', bg: 'bg-triage-red-bg', border: 'border-triage-red-border', text: 'text-triage-red' },
@@ -58,7 +59,16 @@ const Medico = () => {
 
   const [fichaFinalizada, setFichaFinalizada] = useState<Paciente | null>(null);
 
+  const alertasContraindicacao = ficha
+    ? verificarContraindicacoes(ficha.comorbidade, medicamentos)
+    : [];
+  const comorbidadesDetectadas = ficha ? detectarComorbidades(ficha.comorbidade) : [];
+
   const finalizarAtendimento = () => {
+    if (alertasContraindicacao.length > 0) {
+      toast.error('Há medicamentos contraindicados para a comorbidade do paciente. Remova-os antes de finalizar.');
+      return;
+    }
     if (ficha && diagnostico.trim()) {
       const prescricaoData = {
         cid,
@@ -352,12 +362,37 @@ const Medico = () => {
               </div>
               <div>
                 <label className="text-[11px] text-muted-foreground mb-1 block">Medicamentos prescritos</label>
+                {comorbidadesDetectadas.length > 0 && (
+                  <div className="mb-2 bg-triage-yellow-bg border border-triage-yellow-border rounded-[10px] p-2.5 text-[11px]">
+                    <div className="font-semibold text-triage-yellow mb-1">
+                      ⚠ Comorbidades detectadas: {comorbidadesDetectadas.map(c => c.comorbidade).join(', ')}
+                    </div>
+                    <div className="text-muted-foreground">
+                      O sistema verifica automaticamente medicamentos contraindicados.
+                    </div>
+                  </div>
+                )}
                 <textarea
                   value={medicamentos}
                   onChange={e => setMedicamentos(e.target.value)}
                   placeholder="Ex: Dipirona 500mg — 1 comp. de 6/6h por 3 dias..."
-                  className="w-full bg-surface2 border border-border rounded-[10px] p-3 text-sm min-h-[70px] resize-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+                  className={`w-full bg-surface2 border rounded-[10px] p-3 text-sm min-h-[70px] resize-none focus:outline-none focus:ring-1 placeholder:text-muted-foreground ${alertasContraindicacao.length > 0 ? 'border-triage-red-border focus:ring-triage-red' : 'border-border focus:ring-primary'}`}
                 />
+                {alertasContraindicacao.length > 0 && (
+                  <div className="mt-2 bg-triage-red-bg border border-triage-red-border rounded-[10px] p-3 text-[12px]">
+                    <div className="font-bold text-triage-red mb-1.5">
+                      🚫 Medicamentos contraindicados — não é possível finalizar
+                    </div>
+                    <ul className="space-y-1 text-triage-red">
+                      {alertasContraindicacao.map((a, i) => (
+                        <li key={i}>
+                          <strong className="capitalize">{a.medicamento}</strong> — {a.motivo}{' '}
+                          <span className="text-muted-foreground">({a.comorbidade})</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="text-[11px] text-muted-foreground mb-1 block">Procedimentos realizados / solicitados</label>
@@ -381,7 +416,7 @@ const Medico = () => {
 
             <button
               onClick={finalizarAtendimento}
-              disabled={!diagnostico.trim()}
+              disabled={!diagnostico.trim() || alertasContraindicacao.length > 0}
               className="w-full bg-primary text-primary-foreground rounded-[10px] py-3.5 text-sm font-semibold font-heading hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Finalizar atendimento e salvar prescrição
