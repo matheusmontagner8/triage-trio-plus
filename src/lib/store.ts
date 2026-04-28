@@ -69,6 +69,140 @@ export const CID_POR_ESPECIALIDADE: Record<string, { codigo: string; descricao: 
   'Pediatria': CIDS_COMUNS,
 };
 
+// ============================================================================
+// Verificação de contraindicações medicamentosas por comorbidade
+// ============================================================================
+export interface Contraindicacao {
+  comorbidade: string;
+  keywords: string[];
+  medicamentos: { nome: string; motivo: string }[];
+}
+
+export const CONTRAINDICACOES: Contraindicacao[] = [
+  {
+    comorbidade: 'Hipertensão arterial',
+    keywords: ['hipertens', 'pressão alta', 'pressao alta', 'has '],
+    medicamentos: [
+      { nome: 'ibuprofeno', motivo: 'AINE eleva a pressão arterial e reduz efeito de anti-hipertensivos' },
+      { nome: 'diclofenaco', motivo: 'AINE eleva a pressão arterial' },
+      { nome: 'naproxeno', motivo: 'AINE eleva a pressão arterial' },
+      { nome: 'cetoprofeno', motivo: 'AINE eleva a pressão arterial' },
+      { nome: 'pseudoefedrina', motivo: 'Vasoconstritor — eleva a pressão arterial' },
+      { nome: 'prednisona', motivo: 'Corticoide — retém sódio e eleva a pressão' },
+    ],
+  },
+  {
+    comorbidade: 'Diabetes mellitus',
+    keywords: ['diabet', 'dm '],
+    medicamentos: [
+      { nome: 'prednisona', motivo: 'Corticoide eleva significativamente a glicemia' },
+      { nome: 'dexametasona', motivo: 'Corticoide eleva significativamente a glicemia' },
+      { nome: 'hidrocortisona', motivo: 'Corticoide eleva a glicemia' },
+      { nome: 'xarope com açúcar', motivo: 'Contém sacarose — descompensa glicemia' },
+    ],
+  },
+  {
+    comorbidade: 'Asma / DPOC',
+    keywords: ['asma', 'dpoc', 'bronquit', 'enfisema'],
+    medicamentos: [
+      { nome: 'propranolol', motivo: 'Betabloqueador não seletivo — pode desencadear broncoespasmo' },
+      { nome: 'atenolol', motivo: 'Betabloqueador — risco de broncoespasmo' },
+      { nome: 'aspirina', motivo: 'AAS pode desencadear crise asmática' },
+      { nome: 'aas', motivo: 'AAS pode desencadear crise asmática' },
+      { nome: 'ibuprofeno', motivo: 'AINE pode desencadear broncoespasmo em asmáticos' },
+    ],
+  },
+  {
+    comorbidade: 'Insuficiência renal',
+    keywords: ['renal', 'irc', 'nefropat'],
+    medicamentos: [
+      { nome: 'ibuprofeno', motivo: 'AINE é nefrotóxico — agrava função renal' },
+      { nome: 'diclofenaco', motivo: 'AINE é nefrotóxico' },
+      { nome: 'naproxeno', motivo: 'AINE é nefrotóxico' },
+      { nome: 'cetoprofeno', motivo: 'AINE é nefrotóxico' },
+      { nome: 'gentamicina', motivo: 'Aminoglicosídeo — nefrotóxico' },
+      { nome: 'metformina', motivo: 'Risco de acidose láctica em insuficiência renal' },
+    ],
+  },
+  {
+    comorbidade: 'Insuficiência cardíaca',
+    keywords: ['insuficiência cardíaca', 'insuficiencia cardiaca', 'icc', 'cardiopat'],
+    medicamentos: [
+      { nome: 'ibuprofeno', motivo: 'AINE causa retenção hídrica e descompensa IC' },
+      { nome: 'diclofenaco', motivo: 'AINE causa retenção hídrica' },
+      { nome: 'naproxeno', motivo: 'AINE causa retenção hídrica' },
+      { nome: 'pioglitazona', motivo: 'Agrava insuficiência cardíaca' },
+    ],
+  },
+  {
+    comorbidade: 'Gestação',
+    keywords: ['gestant', 'grávid', 'gravid', 'gravidez'],
+    medicamentos: [
+      { nome: 'misoprostol', motivo: 'Abortivo — contraindicado na gestação' },
+      { nome: 'isotretinoína', motivo: 'Teratogênico' },
+      { nome: 'isotretinoina', motivo: 'Teratogênico' },
+      { nome: 'varfarina', motivo: 'Teratogênico' },
+      { nome: 'enalapril', motivo: 'IECA — teratogênico (2º e 3º trimestres)' },
+      { nome: 'losartana', motivo: 'BRA — teratogênico' },
+      { nome: 'tetraciclina', motivo: 'Altera formação óssea e dentária do feto' },
+      { nome: 'doxiciclina', motivo: 'Altera formação óssea e dentária do feto' },
+      { nome: 'ibuprofeno', motivo: 'AINE contraindicado no 3º trimestre' },
+    ],
+  },
+  {
+    comorbidade: 'Úlcera / Gastrite',
+    keywords: ['úlcera', 'ulcera', 'gastrit', 'refluxo', 'drge'],
+    medicamentos: [
+      { nome: 'aspirina', motivo: 'AAS lesiona mucosa gástrica' },
+      { nome: 'aas', motivo: 'AAS lesiona mucosa gástrica' },
+      { nome: 'ibuprofeno', motivo: 'AINE agrava úlcera/gastrite' },
+      { nome: 'diclofenaco', motivo: 'AINE agrava úlcera/gastrite' },
+      { nome: 'naproxeno', motivo: 'AINE agrava úlcera/gastrite' },
+      { nome: 'cetoprofeno', motivo: 'AINE agrava úlcera/gastrite' },
+    ],
+  },
+  {
+    comorbidade: 'Hepatopatia',
+    keywords: ['hepat', 'fígado', 'figado', 'cirrose'],
+    medicamentos: [
+      { nome: 'paracetamol', motivo: 'Hepatotóxico em doses elevadas — usar com cautela' },
+      { nome: 'metotrexato', motivo: 'Hepatotóxico' },
+      { nome: 'isoniazida', motivo: 'Hepatotóxico' },
+      { nome: 'cetoconazol', motivo: 'Hepatotóxico' },
+    ],
+  },
+];
+
+export function detectarComorbidades(texto: string): Contraindicacao[] {
+  if (!texto) return [];
+  const t = texto.toLowerCase();
+  if (t.trim() === 'nenhuma') return [];
+  return CONTRAINDICACOES.filter(c => c.keywords.some(k => t.includes(k.toLowerCase())));
+}
+
+export interface AlertaContraindicacao {
+  comorbidade: string;
+  medicamento: string;
+  motivo: string;
+}
+
+export function verificarContraindicacoes(
+  comorbidadeTexto: string,
+  medicamentosTexto: string
+): AlertaContraindicacao[] {
+  const ativas = detectarComorbidades(comorbidadeTexto);
+  if (ativas.length === 0 || !medicamentosTexto) return [];
+  const medLower = medicamentosTexto.toLowerCase();
+  const alertas: AlertaContraindicacao[] = [];
+  for (const c of ativas) {
+    for (const m of c.medicamentos) {
+      if (medLower.includes(m.nome.toLowerCase())) {
+        alertas.push({ comorbidade: c.comorbidade, medicamento: m.nome, motivo: m.motivo });
+      }
+    }
+  }
+  return alertas;
+}
 
 export function getFichas(): Record<string, Paciente> {
   return JSON.parse(localStorage.getItem('triagem_fichas') || '{}');
