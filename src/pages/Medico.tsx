@@ -416,7 +416,7 @@ const Medico = () => {
 
             <button
               onClick={finalizarAtendimento}
-              disabled={!diagnostico.trim()}
+              disabled={!diagnostico.trim() || alertasContraindicacao.length > 0}
               className="w-full bg-primary text-primary-foreground rounded-[10px] py-3.5 text-sm font-semibold font-heading hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Finalizar atendimento e salvar prescrição
