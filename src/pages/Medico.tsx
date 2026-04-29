@@ -428,6 +428,27 @@ const Medico = () => {
               </div>
             </div>
 
+            {alertasContraindicacao.length > 0 && (
+              <div className="mb-3 bg-triage-red-bg border-2 border-triage-red-border rounded-[10px] p-3.5">
+                <div className="flex items-center gap-2 font-bold text-triage-red text-[13px] mb-2">
+                  <span>⚠</span>
+                  <span>Resumo do bloqueio ({alertasContraindicacao.length})</span>
+                </div>
+                <ul className="space-y-1 text-[12px]">
+                  {alertasContraindicacao.map((a, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-triage-red shrink-0">•</span>
+                      <span>
+                        <strong className="capitalize text-foreground">{a.medicamento}</strong>
+                        <span className="text-muted-foreground"> — {a.motivo} </span>
+                        <span className="text-triage-red font-semibold">({a.comorbidade})</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <button
               onClick={finalizarAtendimento}
               disabled={!diagnostico.trim() || alertasContraindicacao.length > 0}
