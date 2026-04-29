@@ -485,16 +485,27 @@ export interface AlertaContraindicacao {
 
 export function verificarContraindicacoes(
   comorbidadeTexto: string,
-  medicamentosTexto: string
+  medicamentosTexto: string,
+  alergiaTexto?: string
 ): AlertaContraindicacao[] {
-  const ativas = detectarComorbidades(comorbidadeTexto);
+  // Junta comorbidade + alergia para detectar todas as condições relevantes
+  const textoCondicoes = [comorbidadeTexto, alergiaTexto].filter(Boolean).join(' ; ');
+  const ativas = detectarComorbidades(textoCondicoes);
   if (ativas.length === 0 || !medicamentosTexto) return [];
-  const medLower = medicamentosTexto.toLowerCase();
+  const medNorm = normalizar(medicamentosTexto);
   const alertas: AlertaContraindicacao[] = [];
+  const vistos = new Set<string>();
   for (const c of ativas) {
     for (const m of c.medicamentos) {
-      if (medLower.includes(m.nome.toLowerCase())) {
-        alertas.push({ comorbidade: c.comorbidade, medicamento: m.nome, motivo: m.motivo });
+      const nomeNorm = normalizar(m.nome);
+      // Match por palavra: evita falso-positivo (ex: "aas" dentro de outra palavra)
+      const padrao = new RegExp(`(^|[^a-z0-9])${nomeNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z0-9]|$)`, 'i');
+      if (padrao.test(medNorm)) {
+        const chave = `${c.comorbidade}|${nomeNorm}`;
+        if (!vistos.has(chave)) {
+          vistos.add(chave);
+          alertas.push({ comorbidade: c.comorbidade, medicamento: m.nome, motivo: m.motivo });
+        }
       }
     }
   }
