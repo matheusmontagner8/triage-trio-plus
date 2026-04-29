@@ -483,24 +483,90 @@ export interface AlertaContraindicacao {
   motivo: string;
 }
 
+// Mapa de equivalências/marcas → princípios ativos para reforçar match de alergias.
+// Quando o paciente declara alergia a um item à esquerda, todos os termos à direita
+// (e o próprio termo) também serão bloqueados se aparecerem na prescrição.
+const EQUIVALENCIAS_FARMACO: Record<string, string[]> = {
+  'aas': ['aspirina', 'acido acetilsalicilico', 'ácido acetilsalicílico', 'aas'],
+  'aspirina': ['aas', 'acido acetilsalicilico', 'ácido acetilsalicílico', 'aspirina'],
+  'acido acetilsalicilico': ['aas', 'aspirina', 'ácido acetilsalicílico'],
+  'dipirona': ['novalgina', 'metamizol', 'anador', 'magnopyrol'],
+  'novalgina': ['dipirona', 'metamizol'],
+  'metamizol': ['dipirona', 'novalgina'],
+  'paracetamol': ['acetaminofeno', 'tylenol'],
+  'acetaminofeno': ['paracetamol', 'tylenol'],
+  'ibuprofeno': ['advil', 'alivium', 'motrin'],
+  'diclofenaco': ['cataflam', 'voltaren'],
+  'amoxicilina': ['amoxil', 'novocilin'],
+  'penicilina': ['benzetacil', 'amoxicilina', 'ampicilina'],
+  'azitromicina': ['zitromax'],
+  'cefalexina': ['keflex'],
+  'sulfametoxazol': ['bactrim', 'sulfa'],
+  'omeprazol': ['losec'],
+  'losartana': ['cozaar'],
+  'sinvastatina': ['zocor'],
+  'tramadol': ['tramal'],
+};
+
+// Extrai uma lista de fármacos/marcas declarados como alergia no campo alergia.
+// Ex.: "Sim - Dipirona, Penicilina" → ["dipirona", "penicilina"]
+function extrairFarmacosAlergia(alergiaTexto?: string): string[] {
+  if (!alergiaTexto) return [];
+  const t = normalizar(alergiaTexto);
+  if (!t || t === 'nenhuma' || t === 'nao' || t === 'n/a' || t === 'sem alergia') return [];
+  // Remove prefixos comuns
+  const limpo = t
+    .replace(/^.*?\balerg(ia|ico|ica)?\s*(a|ao|à|aos|às|:|-)?\s*/i, '')
+    .replace(/\balergia relatada\b.*$/i, '')
+    .replace(/\(.*?\)/g, '');
+  // Quebra por separadores comuns
+  const tokens = limpo
+    .split(/[,;/\n]| e | ou /)
+    .map(s => s.trim())
+    .filter(s => s.length >= 3 && !/^(sim|nao|medicament[oa]s?|n[aã]o\s*especificad)/.test(s));
+  // Expande com equivalências
+  const set = new Set<string>();
+  for (const tok of tokens) {
+    const base = normalizar(tok);
+    if (!base) continue;
+    set.add(base);
+    // Adiciona equivalências de cada palavra do token
+    for (const palavra of base.split(/\s+/)) {
+      if (EQUIVALENCIAS_FARMACO[palavra]) {
+        for (const eq of EQUIVALENCIAS_FARMACO[palavra]) set.add(normalizar(eq));
+      }
+    }
+    if (EQUIVALENCIAS_FARMACO[base]) {
+      for (const eq of EQUIVALENCIAS_FARMACO[base]) set.add(normalizar(eq));
+    }
+  }
+  return Array.from(set);
+}
+
 export function verificarContraindicacoes(
   comorbidadeTexto: string,
   medicamentosTexto: string,
   alergiaTexto?: string
 ): AlertaContraindicacao[] {
+  if (!medicamentosTexto) return [];
   // Junta comorbidade + alergia para detectar todas as condições relevantes
   const textoCondicoes = [comorbidadeTexto, alergiaTexto].filter(Boolean).join(' ; ');
   const ativas = detectarComorbidades(textoCondicoes);
-  if (ativas.length === 0 || !medicamentosTexto) return [];
   const medNorm = normalizar(medicamentosTexto);
   const alertas: AlertaContraindicacao[] = [];
   const vistos = new Set<string>();
+
+  const matchPalavra = (nomeNorm: string) => {
+    if (!nomeNorm) return false;
+    const escaped = nomeNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, 'i').test(medNorm);
+  };
+
+  // 1) Contraindicações por comorbidade/condição declarada
   for (const c of ativas) {
     for (const m of c.medicamentos) {
       const nomeNorm = normalizar(m.nome);
-      // Match por palavra: evita falso-positivo (ex: "aas" dentro de outra palavra)
-      const padrao = new RegExp(`(^|[^a-z0-9])${nomeNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z0-9]|$)`, 'i');
-      if (padrao.test(medNorm)) {
+      if (matchPalavra(nomeNorm)) {
         const chave = `${c.comorbidade}|${nomeNorm}`;
         if (!vistos.has(chave)) {
           vistos.add(chave);
@@ -509,6 +575,23 @@ export function verificarContraindicacoes(
       }
     }
   }
+
+  // 2) Bloqueio genérico: qualquer fármaco declarado no campo de alergia do paciente
+  const alergicoA = extrairFarmacosAlergia(alergiaTexto);
+  for (const farmaco of alergicoA) {
+    if (matchPalavra(farmaco)) {
+      const chave = `ALERGIA|${farmaco}`;
+      if (!vistos.has(chave)) {
+        vistos.add(chave);
+        alertas.push({
+          comorbidade: `Alergia declarada a ${farmaco}`,
+          medicamento: farmaco,
+          motivo: 'Paciente declarou alergia a este medicamento — prescrição bloqueada',
+        });
+      }
+    }
+  }
+
   return alertas;
 }
 
