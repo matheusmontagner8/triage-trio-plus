@@ -214,11 +214,40 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
 ];
 
+// Normaliza texto: minúsculo, sem acentos, espaços colapsados
+function normalizar(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Compila um padrão (string keyword) em RegExp tolerante a acentos.
+// Aceita tanto strings simples (substring) quanto padrões regex (com \b, [], etc.)
+function compilarPadrao(pattern: string): RegExp {
+  // Remove acentos do próprio padrão para casar contra texto normalizado
+  const semAcento = pattern
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+  try {
+    return new RegExp(semAcento, 'i');
+  } catch {
+    // Se não for regex válida, escapa e usa como literal
+    const escaped = semAcento.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(escaped, 'i');
+  }
+}
+
 export function detectarComorbidades(texto: string): Contraindicacao[] {
   if (!texto) return [];
-  const t = texto.toLowerCase();
-  if (t.trim() === 'nenhuma') return [];
-  return CONTRAINDICACOES.filter(c => c.keywords.some(k => t.includes(k.toLowerCase())));
+  const t = normalizar(texto);
+  if (!t || t === 'nenhuma' || t === 'nenhum' || t === 'nao' || t === 'n/a') return [];
+  return CONTRAINDICACOES.filter(c =>
+    c.keywords.some(k => compilarPadrao(k).test(t))
+  );
 }
 
 export interface AlertaContraindicacao {
