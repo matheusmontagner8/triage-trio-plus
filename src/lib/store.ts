@@ -93,8 +93,20 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
       { nome: 'diclofenaco', motivo: 'AINE eleva a pressão arterial' },
       { nome: 'naproxeno', motivo: 'AINE eleva a pressão arterial' },
       { nome: 'cetoprofeno', motivo: 'AINE eleva a pressão arterial' },
+      { nome: 'nimesulida', motivo: 'AINE eleva a pressão arterial' },
+      { nome: 'piroxicam', motivo: 'AINE eleva a pressão arterial' },
+      { nome: 'meloxicam', motivo: 'AINE eleva a pressão arterial' },
+      { nome: 'celecoxibe', motivo: 'AINE COX-2 eleva pressão e risco cardiovascular' },
+      { nome: 'etoricoxibe', motivo: 'AINE COX-2 eleva pressão e risco cardiovascular' },
       { nome: 'pseudoefedrina', motivo: 'Vasoconstritor — eleva a pressão arterial' },
+      { nome: 'fenilefrina', motivo: 'Vasoconstritor — eleva a pressão arterial' },
+      { nome: 'efedrina', motivo: 'Vasoconstritor — eleva a pressão arterial' },
       { nome: 'prednisona', motivo: 'Corticoide — retém sódio e eleva a pressão' },
+      { nome: 'prednisolona', motivo: 'Corticoide — retém sódio e eleva a pressão' },
+      { nome: 'dexametasona', motivo: 'Corticoide — retém sódio e eleva a pressão' },
+      { nome: 'sibutramina', motivo: 'Eleva pressão arterial e frequência cardíaca' },
+      { nome: 'metilfenidato', motivo: 'Estimulante — eleva pressão arterial' },
+      { nome: 'venlafaxina', motivo: 'Pode elevar a pressão arterial em doses altas' },
     ],
   },
   {
@@ -107,8 +119,16 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
     ],
     medicamentos: [
       { nome: 'prednisona', motivo: 'Corticoide eleva significativamente a glicemia' },
+      { nome: 'prednisolona', motivo: 'Corticoide eleva significativamente a glicemia' },
       { nome: 'dexametasona', motivo: 'Corticoide eleva significativamente a glicemia' },
       { nome: 'hidrocortisona', motivo: 'Corticoide eleva a glicemia' },
+      { nome: 'betametasona', motivo: 'Corticoide eleva a glicemia' },
+      { nome: 'metilprednisolona', motivo: 'Corticoide eleva a glicemia' },
+      { nome: 'olanzapina', motivo: 'Antipsicótico — causa hiperglicemia e ganho de peso' },
+      { nome: 'clozapina', motivo: 'Antipsicótico — causa hiperglicemia' },
+      { nome: 'quetiapina', motivo: 'Antipsicótico — causa hiperglicemia' },
+      { nome: 'tiazida', motivo: 'Diurético tiazídico eleva glicemia em altas doses' },
+      { nome: 'hidroclorotiazida', motivo: 'Diurético tiazídico eleva glicemia' },
       { nome: 'xarope com açúcar', motivo: 'Contém sacarose — descompensa glicemia' },
     ],
   },
@@ -122,9 +142,19 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
     medicamentos: [
       { nome: 'propranolol', motivo: 'Betabloqueador não seletivo — pode desencadear broncoespasmo' },
       { nome: 'atenolol', motivo: 'Betabloqueador — risco de broncoespasmo' },
-      { nome: 'aspirina', motivo: 'AAS pode desencadear crise asmática' },
+      { nome: 'metoprolol', motivo: 'Betabloqueador — risco de broncoespasmo em altas doses' },
+      { nome: 'carvedilol', motivo: 'Betabloqueador não seletivo — risco de broncoespasmo' },
+      { nome: 'timolol', motivo: 'Betabloqueador — risco de broncoespasmo (mesmo colírio)' },
+      { nome: 'aspirina', motivo: 'AAS pode desencadear crise asmática (asma por AINE)' },
       { nome: 'aas', motivo: 'AAS pode desencadear crise asmática' },
+      { nome: 'ácido acetilsalicílico', motivo: 'AAS pode desencadear crise asmática' },
+      { nome: 'acido acetilsalicilico', motivo: 'AAS pode desencadear crise asmática' },
       { nome: 'ibuprofeno', motivo: 'AINE pode desencadear broncoespasmo em asmáticos' },
+      { nome: 'diclofenaco', motivo: 'AINE pode desencadear broncoespasmo' },
+      { nome: 'naproxeno', motivo: 'AINE pode desencadear broncoespasmo' },
+      { nome: 'codeína', motivo: 'Opioide — depressão respiratória' },
+      { nome: 'codeina', motivo: 'Opioide — depressão respiratória' },
+      { nome: 'morfina', motivo: 'Opioide — depressão respiratória' },
     ],
   },
   {
@@ -141,8 +171,18 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
       { nome: 'diclofenaco', motivo: 'AINE é nefrotóxico' },
       { nome: 'naproxeno', motivo: 'AINE é nefrotóxico' },
       { nome: 'cetoprofeno', motivo: 'AINE é nefrotóxico' },
+      { nome: 'nimesulida', motivo: 'AINE é nefrotóxico' },
+      { nome: 'piroxicam', motivo: 'AINE é nefrotóxico' },
+      { nome: 'meloxicam', motivo: 'AINE é nefrotóxico' },
       { nome: 'gentamicina', motivo: 'Aminoglicosídeo — nefrotóxico' },
+      { nome: 'amicacina', motivo: 'Aminoglicosídeo — nefrotóxico' },
+      { nome: 'vancomicina', motivo: 'Nefrotóxico — exige ajuste de dose' },
+      { nome: 'anfotericina', motivo: 'Nefrotóxico grave' },
       { nome: 'metformina', motivo: 'Risco de acidose láctica em insuficiência renal' },
+      { nome: 'enoxaparina', motivo: 'Acumula em IR — risco hemorrágico' },
+      { nome: 'lítio', motivo: 'Nefrotóxico e acumula em IR' },
+      { nome: 'litio', motivo: 'Nefrotóxico e acumula em IR' },
+      { nome: 'contraste iodado', motivo: 'Nefrotoxicidade por contraste' },
     ],
   },
   {
@@ -157,7 +197,13 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
       { nome: 'ibuprofeno', motivo: 'AINE causa retenção hídrica e descompensa IC' },
       { nome: 'diclofenaco', motivo: 'AINE causa retenção hídrica' },
       { nome: 'naproxeno', motivo: 'AINE causa retenção hídrica' },
+      { nome: 'nimesulida', motivo: 'AINE causa retenção hídrica' },
+      { nome: 'celecoxibe', motivo: 'AINE COX-2 — risco cardiovascular' },
       { nome: 'pioglitazona', motivo: 'Agrava insuficiência cardíaca' },
+      { nome: 'rosiglitazona', motivo: 'Agrava insuficiência cardíaca' },
+      { nome: 'verapamil', motivo: 'Bloqueador de cálcio — deprime contratilidade' },
+      { nome: 'diltiazem', motivo: 'Bloqueador de cálcio — deprime contratilidade' },
+      { nome: 'flecainida', motivo: 'Antiarrítmico contraindicado em IC' },
     ],
   },
   {
@@ -170,14 +216,35 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
     ],
     medicamentos: [
       { nome: 'misoprostol', motivo: 'Abortivo — contraindicado na gestação' },
-      { nome: 'isotretinoína', motivo: 'Teratogênico' },
-      { nome: 'isotretinoina', motivo: 'Teratogênico' },
+      { nome: 'isotretinoína', motivo: 'Teratogênico grave' },
+      { nome: 'isotretinoina', motivo: 'Teratogênico grave' },
+      { nome: 'talidomida', motivo: 'Teratogênico grave' },
       { nome: 'varfarina', motivo: 'Teratogênico' },
+      { nome: 'warfarina', motivo: 'Teratogênico' },
       { nome: 'enalapril', motivo: 'IECA — teratogênico (2º e 3º trimestres)' },
+      { nome: 'captopril', motivo: 'IECA — teratogênico' },
+      { nome: 'lisinopril', motivo: 'IECA — teratogênico' },
+      { nome: 'ramipril', motivo: 'IECA — teratogênico' },
       { nome: 'losartana', motivo: 'BRA — teratogênico' },
+      { nome: 'valsartana', motivo: 'BRA — teratogênico' },
       { nome: 'tetraciclina', motivo: 'Altera formação óssea e dentária do feto' },
       { nome: 'doxiciclina', motivo: 'Altera formação óssea e dentária do feto' },
+      { nome: 'ciprofloxacino', motivo: 'Quinolona — afeta cartilagem fetal' },
+      { nome: 'levofloxacino', motivo: 'Quinolona — afeta cartilagem fetal' },
+      { nome: 'metotrexato', motivo: 'Teratogênico e abortivo' },
+      { nome: 'fluconazol', motivo: 'Teratogênico em altas doses' },
+      { nome: 'sinvastatina', motivo: 'Estatina — contraindicada na gestação' },
+      { nome: 'atorvastatina', motivo: 'Estatina — contraindicada na gestação' },
+      { nome: 'rosuvastatina', motivo: 'Estatina — contraindicada na gestação' },
       { nome: 'ibuprofeno', motivo: 'AINE contraindicado no 3º trimestre' },
+      { nome: 'diclofenaco', motivo: 'AINE contraindicado no 3º trimestre' },
+      { nome: 'aspirina', motivo: 'AAS contraindicado no 3º trimestre (dose plena)' },
+      { nome: 'fenitoína', motivo: 'Teratogênico — síndrome fetal por hidantoína' },
+      { nome: 'fenitoina', motivo: 'Teratogênico' },
+      { nome: 'ácido valproico', motivo: 'Teratogênico — defeitos do tubo neural' },
+      { nome: 'acido valproico', motivo: 'Teratogênico' },
+      { nome: 'valproato', motivo: 'Teratogênico' },
+      { nome: 'carbamazepina', motivo: 'Teratogênico' },
     ],
   },
   {
@@ -191,10 +258,18 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
     medicamentos: [
       { nome: 'aspirina', motivo: 'AAS lesiona mucosa gástrica' },
       { nome: 'aas', motivo: 'AAS lesiona mucosa gástrica' },
+      { nome: 'ácido acetilsalicílico', motivo: 'AAS lesiona mucosa gástrica' },
+      { nome: 'acido acetilsalicilico', motivo: 'AAS lesiona mucosa gástrica' },
       { nome: 'ibuprofeno', motivo: 'AINE agrava úlcera/gastrite' },
       { nome: 'diclofenaco', motivo: 'AINE agrava úlcera/gastrite' },
       { nome: 'naproxeno', motivo: 'AINE agrava úlcera/gastrite' },
       { nome: 'cetoprofeno', motivo: 'AINE agrava úlcera/gastrite' },
+      { nome: 'nimesulida', motivo: 'AINE agrava úlcera/gastrite' },
+      { nome: 'piroxicam', motivo: 'AINE com alto risco gastrointestinal' },
+      { nome: 'meloxicam', motivo: 'AINE agrava úlcera/gastrite' },
+      { nome: 'prednisona', motivo: 'Corticoide aumenta risco de úlcera' },
+      { nome: 'dexametasona', motivo: 'Corticoide aumenta risco de úlcera' },
+      { nome: 'alendronato', motivo: 'Bisfosfonato — esofagite/úlcera' },
     ],
   },
   {
@@ -206,10 +281,162 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
       'insufici[eê]ncia\\s*hep[aá]tica',
     ],
     medicamentos: [
-      { nome: 'paracetamol', motivo: 'Hepatotóxico em doses elevadas — usar com cautela' },
+      { nome: 'paracetamol', motivo: 'Hepatotóxico — risco grave em hepatopatas' },
+      { nome: 'acetaminofeno', motivo: 'Hepatotóxico — risco grave em hepatopatas' },
       { nome: 'metotrexato', motivo: 'Hepatotóxico' },
       { nome: 'isoniazida', motivo: 'Hepatotóxico' },
+      { nome: 'rifampicina', motivo: 'Hepatotóxico' },
+      { nome: 'pirazinamida', motivo: 'Hepatotóxico' },
       { nome: 'cetoconazol', motivo: 'Hepatotóxico' },
+      { nome: 'fluconazol', motivo: 'Hepatotóxico em altas doses' },
+      { nome: 'itraconazol', motivo: 'Hepatotóxico' },
+      { nome: 'nimesulida', motivo: 'Hepatotóxico — banido em vários países' },
+      { nome: 'amiodarona', motivo: 'Hepatotóxico' },
+      { nome: 'sinvastatina', motivo: 'Estatina — risco de hepatotoxicidade' },
+      { nome: 'atorvastatina', motivo: 'Estatina — risco de hepatotoxicidade' },
+      { nome: 'ácido valproico', motivo: 'Hepatotóxico' },
+      { nome: 'valproato', motivo: 'Hepatotóxico' },
+    ],
+  },
+  {
+    comorbidade: 'Epilepsia / Convulsões',
+    keywords: [
+      'epilep', 'convuls', 'crise\\s*convulsiv',
+      'ataque\\s*epil[eé]p', 'mal\\s*epil[eé]p',
+    ],
+    medicamentos: [
+      { nome: 'tramadol', motivo: 'Reduz limiar convulsivo' },
+      { nome: 'bupropiona', motivo: 'Reduz limiar convulsivo' },
+      { nome: 'ciprofloxacino', motivo: 'Quinolona — reduz limiar convulsivo' },
+      { nome: 'levofloxacino', motivo: 'Quinolona — reduz limiar convulsivo' },
+      { nome: 'imipenem', motivo: 'Reduz limiar convulsivo' },
+      { nome: 'clorpromazina', motivo: 'Antipsicótico — reduz limiar convulsivo' },
+      { nome: 'metronidazol', motivo: 'Risco de convulsões em altas doses' },
+    ],
+  },
+  {
+    comorbidade: 'Glaucoma',
+    keywords: ['glaucoma', 'press[aã]o\\s*(intra)?\\s*ocular\\s*alta'],
+    medicamentos: [
+      { nome: 'atropina', motivo: 'Anticolinérgico — agrava glaucoma de ângulo fechado' },
+      { nome: 'escopolamina', motivo: 'Anticolinérgico — agrava glaucoma' },
+      { nome: 'amitriptilina', motivo: 'Anticolinérgico — agrava glaucoma' },
+      { nome: 'difenidramina', motivo: 'Anti-histamínico anticolinérgico — agrava glaucoma' },
+      { nome: 'prometazina', motivo: 'Anticolinérgico — agrava glaucoma' },
+      { nome: 'oxibutinina', motivo: 'Anticolinérgico — agrava glaucoma' },
+    ],
+  },
+  {
+    comorbidade: 'Hipertireoidismo',
+    keywords: [
+      'hipertireoid', 'tireoide\\s*hiperativ', 'doen[çc]a\\s*de\\s*graves',
+      't4\\s*alto', 'tsh\\s*suprimido',
+    ],
+    medicamentos: [
+      { nome: 'levotiroxina', motivo: 'Hormônio tireoidiano — agrava hipertireoidismo' },
+      { nome: 'pseudoefedrina', motivo: 'Simpatomimético — agrava sintomas' },
+      { nome: 'amiodarona', motivo: 'Contém iodo — agrava hipertireoidismo' },
+    ],
+  },
+  {
+    comorbidade: 'Em uso de anticoagulante',
+    keywords: [
+      'anticoagul', 'varfarina', 'warfarina', 'marevan',
+      'rivaroxabana', 'xarelto', 'apixabana', 'eliquis',
+      'dabigatrana', 'pradaxa', 'enoxaparina', 'clexane',
+      'heparina', 'usa\\s*marevan',
+    ],
+    medicamentos: [
+      { nome: 'aspirina', motivo: 'AAS aumenta risco hemorrágico com anticoagulante' },
+      { nome: 'aas', motivo: 'AAS aumenta risco hemorrágico com anticoagulante' },
+      { nome: 'ibuprofeno', motivo: 'AINE potencializa sangramento' },
+      { nome: 'diclofenaco', motivo: 'AINE potencializa sangramento' },
+      { nome: 'naproxeno', motivo: 'AINE potencializa sangramento' },
+      { nome: 'cetoprofeno', motivo: 'AINE potencializa sangramento' },
+      { nome: 'clopidogrel', motivo: 'Antiagregante — soma efeito anticoagulante' },
+      { nome: 'ginkgo biloba', motivo: 'Aumenta risco de sangramento' },
+    ],
+  },
+  {
+    comorbidade: 'Lactação / Amamentação',
+    keywords: [
+      'lacta[çc][aã]o', 'amamenta', 'aleitamento', 'puerp[eé]rio',
+      'amamentando', 'lactante',
+    ],
+    medicamentos: [
+      { nome: 'amiodarona', motivo: 'Contraindicado na lactação' },
+      { nome: 'lítio', motivo: 'Excretado no leite — toxicidade no lactente' },
+      { nome: 'litio', motivo: 'Excretado no leite — toxicidade no lactente' },
+      { nome: 'metotrexato', motivo: 'Contraindicado na lactação' },
+      { nome: 'cloranfenicol', motivo: 'Risco de síndrome do bebê cinzento' },
+      { nome: 'tetraciclina', motivo: 'Contraindicado na lactação' },
+      { nome: 'doxiciclina', motivo: 'Contraindicado na lactação' },
+      { nome: 'ciprofloxacino', motivo: 'Contraindicado na lactação' },
+      { nome: 'codeína', motivo: 'Risco de depressão respiratória no lactente' },
+      { nome: 'codeina', motivo: 'Risco de depressão respiratória no lactente' },
+      { nome: 'isotretinoína', motivo: 'Contraindicado na lactação' },
+      { nome: 'isotretinoina', motivo: 'Contraindicado na lactação' },
+    ],
+  },
+  {
+    comorbidade: 'Alergia a AINE / AAS',
+    keywords: [
+      'alerg.*\\b(aine|aas|aspirina|ibuprofeno|dipirona|diclofenaco|nimesulida|naproxeno|paracetamol)\\b',
+      '\\b(aine|aas|aspirina|ibuprofeno|dipirona|diclofenaco|nimesulida|naproxeno|paracetamol)\\b.*alerg',
+    ],
+    medicamentos: [
+      { nome: 'aspirina', motivo: 'Alergia relatada a AAS/AINE' },
+      { nome: 'aas', motivo: 'Alergia relatada a AAS/AINE' },
+      { nome: 'ibuprofeno', motivo: 'Alergia relatada a AINE' },
+      { nome: 'diclofenaco', motivo: 'Alergia relatada a AINE' },
+      { nome: 'naproxeno', motivo: 'Alergia relatada a AINE' },
+      { nome: 'cetoprofeno', motivo: 'Alergia relatada a AINE' },
+      { nome: 'nimesulida', motivo: 'Alergia relatada a AINE' },
+      { nome: 'piroxicam', motivo: 'Alergia relatada a AINE' },
+      { nome: 'meloxicam', motivo: 'Alergia relatada a AINE' },
+      { nome: 'dipirona', motivo: 'Reatividade cruzada com AINE' },
+    ],
+  },
+  {
+    comorbidade: 'Alergia a penicilina / betalactâmicos',
+    keywords: [
+      'alerg.*\\b(penicilina|amoxicilina|ampicilina|cefalosporina|betalact|beta\\s*lact)\\b',
+      '\\b(penicilina|amoxicilina|ampicilina|cefalosporina)\\b.*alerg',
+    ],
+    medicamentos: [
+      { nome: 'penicilina', motivo: 'Alergia a betalactâmicos relatada' },
+      { nome: 'amoxicilina', motivo: 'Alergia a betalactâmicos relatada' },
+      { nome: 'ampicilina', motivo: 'Alergia a betalactâmicos relatada' },
+      { nome: 'cefalexina', motivo: 'Cefalosporina — risco de reação cruzada' },
+      { nome: 'cefaclor', motivo: 'Cefalosporina — risco de reação cruzada' },
+      { nome: 'ceftriaxona', motivo: 'Cefalosporina — risco de reação cruzada' },
+      { nome: 'cefuroxima', motivo: 'Cefalosporina — risco de reação cruzada' },
+      { nome: 'oxacilina', motivo: 'Betalactâmico — alergia relatada' },
+    ],
+  },
+  {
+    comorbidade: 'Alergia a sulfas',
+    keywords: [
+      'alerg.*\\b(sulfa|sulfas|bactrim|sulfametoxazol)\\b',
+      '\\b(sulfa|sulfas|bactrim)\\b.*alerg',
+    ],
+    medicamentos: [
+      { nome: 'sulfametoxazol', motivo: 'Alergia a sulfas relatada' },
+      { nome: 'bactrim', motivo: 'Contém sulfa — alergia relatada' },
+      { nome: 'sulfadiazina', motivo: 'Sulfa — alergia relatada' },
+      { nome: 'sulfassalazina', motivo: 'Sulfa — alergia relatada' },
+    ],
+  },
+  {
+    comorbidade: 'Alergia a dipirona',
+    keywords: [
+      'alerg.*\\b(dipirona|metamizol|novalgina)\\b',
+      '\\b(dipirona|metamizol|novalgina)\\b.*alerg',
+    ],
+    medicamentos: [
+      { nome: 'dipirona', motivo: 'Alergia a dipirona relatada' },
+      { nome: 'metamizol', motivo: 'Mesma substância da dipirona' },
+      { nome: 'novalgina', motivo: 'Marca da dipirona — alergia relatada' },
     ],
   },
 ];
@@ -258,16 +485,27 @@ export interface AlertaContraindicacao {
 
 export function verificarContraindicacoes(
   comorbidadeTexto: string,
-  medicamentosTexto: string
+  medicamentosTexto: string,
+  alergiaTexto?: string
 ): AlertaContraindicacao[] {
-  const ativas = detectarComorbidades(comorbidadeTexto);
+  // Junta comorbidade + alergia para detectar todas as condições relevantes
+  const textoCondicoes = [comorbidadeTexto, alergiaTexto].filter(Boolean).join(' ; ');
+  const ativas = detectarComorbidades(textoCondicoes);
   if (ativas.length === 0 || !medicamentosTexto) return [];
-  const medLower = medicamentosTexto.toLowerCase();
+  const medNorm = normalizar(medicamentosTexto);
   const alertas: AlertaContraindicacao[] = [];
+  const vistos = new Set<string>();
   for (const c of ativas) {
     for (const m of c.medicamentos) {
-      if (medLower.includes(m.nome.toLowerCase())) {
-        alertas.push({ comorbidade: c.comorbidade, medicamento: m.nome, motivo: m.motivo });
+      const nomeNorm = normalizar(m.nome);
+      // Match por palavra: evita falso-positivo (ex: "aas" dentro de outra palavra)
+      const padrao = new RegExp(`(^|[^a-z0-9])${nomeNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z0-9]|$)`, 'i');
+      if (padrao.test(medNorm)) {
+        const chave = `${c.comorbidade}|${nomeNorm}`;
+        if (!vistos.has(chave)) {
+          vistos.add(chave);
+          alertas.push({ comorbidade: c.comorbidade, medicamento: m.nome, motivo: m.motivo });
+        }
       }
     }
   }
