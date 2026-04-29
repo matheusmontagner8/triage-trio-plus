@@ -99,7 +99,12 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Diabetes mellitus',
-    keywords: ['diabet', 'dm '],
+    keywords: [
+      'diabet', 'diabete', 'diabetico', 'diabetica',
+      '\\bdm\\b', '\\bdm\\s*(1|2|i|ii|tipo)',
+      'a[çc]ucar\\s*(alto|elevado)', 'glicemia\\s*alta', 'glicose\\s*alta',
+      'insulino\\s*dependente', 'insulinodependente',
+    ],
     medicamentos: [
       { nome: 'prednisona', motivo: 'Corticoide eleva significativamente a glicemia' },
       { nome: 'dexametasona', motivo: 'Corticoide eleva significativamente a glicemia' },
@@ -109,7 +114,11 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Asma / DPOC',
-    keywords: ['asma', 'dpoc', 'bronquit', 'enfisema'],
+    keywords: [
+      'asma', 'asmatic', '\\bdpoc\\b', 'bronquit', 'enfisema',
+      'doen[çc]a\\s*pulmonar\\s*obstrutiva', 'broncoespasmo',
+      'falta\\s*de\\s*ar\\s*cr[oô]nica', 'chiado\\s*no\\s*peito',
+    ],
     medicamentos: [
       { nome: 'propranolol', motivo: 'Betabloqueador não seletivo — pode desencadear broncoespasmo' },
       { nome: 'atenolol', motivo: 'Betabloqueador — risco de broncoespasmo' },
@@ -120,7 +129,13 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Insuficiência renal',
-    keywords: ['renal', 'irc', 'nefropat'],
+    keywords: [
+      'insufici[eê]ncia\\s*renal', 'insuf\\.?\\s*renal',
+      '\\birc\\b', '\\bdrc\\b', '\\blra\\b',
+      'nefropat', 'doen[çc]a\\s*renal', 'problema\\s*(no|nos)\\s*rim',
+      'rim\\s*(ruim|fraco|doente)', 'rins\\s*(ruins|fracos|doentes)',
+      'di[aá]lise', 'hemodi[aá]lise',
+    ],
     medicamentos: [
       { nome: 'ibuprofeno', motivo: 'AINE é nefrotóxico — agrava função renal' },
       { nome: 'diclofenaco', motivo: 'AINE é nefrotóxico' },
@@ -132,7 +147,12 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Insuficiência cardíaca',
-    keywords: ['insuficiência cardíaca', 'insuficiencia cardiaca', 'icc', 'cardiopat'],
+    keywords: [
+      'insufici[eê]ncia\\s*card[ií]aca', 'insuf\\.?\\s*card',
+      '\\bicc\\b', '\\bic\\s*(descompensada|congestiva)',
+      'cardiopat', 'problema\\s*(no\\s*)?cora[çc][aã]o',
+      'cora[çc][aã]o\\s*(fraco|dilatado|doente)',
+    ],
     medicamentos: [
       { nome: 'ibuprofeno', motivo: 'AINE causa retenção hídrica e descompensa IC' },
       { nome: 'diclofenaco', motivo: 'AINE causa retenção hídrica' },
@@ -142,7 +162,12 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Gestação',
-    keywords: ['gestant', 'grávid', 'gravid', 'gravidez'],
+    keywords: [
+      'gestant', 'gesta[çc][aã]o', 'gr[aá]vid', 'gravidez',
+      'gestando', 'esperando\\s*beb[eê]', '\\bgesta\\b',
+      'pr[eé]\\-?natal', 'pre\\s*natal',
+      '\\d+\\s*(semanas?|meses?)\\s*de\\s*gesta',
+    ],
     medicamentos: [
       { nome: 'misoprostol', motivo: 'Abortivo — contraindicado na gestação' },
       { nome: 'isotretinoína', motivo: 'Teratogênico' },
@@ -157,7 +182,12 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Úlcera / Gastrite',
-    keywords: ['úlcera', 'ulcera', 'gastrit', 'refluxo', 'drge'],
+    keywords: [
+      '[uú]lcera', 'gastrit', 'refluxo', '\\bdrge\\b',
+      'esofagit', 'azia', 'queima[çc][aã]o\\s*(no\\s*)?est[oô]mago',
+      'h\\.?\\s*pylori', 'helicobacter',
+      'dor\\s*no\\s*est[oô]mago\\s*cr[oô]nica',
+    ],
     medicamentos: [
       { nome: 'aspirina', motivo: 'AAS lesiona mucosa gástrica' },
       { nome: 'aas', motivo: 'AAS lesiona mucosa gástrica' },
@@ -169,7 +199,12 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Hepatopatia',
-    keywords: ['hepat', 'fígado', 'figado', 'cirrose'],
+    keywords: [
+      'hepat', 'hepatite', 'f[ií]gado', 'cirrose',
+      'esteatose\\s*hep[aá]tica', 'doen[çc]a\\s*hep[aá]tica',
+      'problema\\s*(no\\s*)?f[ií]gado', 'f[ií]gado\\s*(ruim|gordo|doente)',
+      'insufici[eê]ncia\\s*hep[aá]tica',
+    ],
     medicamentos: [
       { nome: 'paracetamol', motivo: 'Hepatotóxico em doses elevadas — usar com cautela' },
       { nome: 'metotrexato', motivo: 'Hepatotóxico' },
