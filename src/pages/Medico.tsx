@@ -60,9 +60,11 @@ const Medico = () => {
   const [fichaFinalizada, setFichaFinalizada] = useState<Paciente | null>(null);
 
   const alertasContraindicacao = ficha
-    ? verificarContraindicacoes(ficha.comorbidade, medicamentos)
+    ? verificarContraindicacoes(ficha.comorbidade, medicamentos, ficha.alergia)
     : [];
-  const comorbidadesDetectadas = ficha ? detectarComorbidades(ficha.comorbidade) : [];
+  const comorbidadesDetectadas = ficha
+    ? detectarComorbidades([ficha.comorbidade, ficha.alergia].filter(Boolean).join(' ; '))
+    : [];
 
   const finalizarAtendimento = () => {
     if (alertasContraindicacao.length > 0) {
