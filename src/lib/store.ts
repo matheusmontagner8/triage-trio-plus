@@ -81,7 +81,13 @@ export interface Contraindicacao {
 export const CONTRAINDICACOES: Contraindicacao[] = [
   {
     comorbidade: 'Hipertensão arterial',
-    keywords: ['hipertens', 'pressão alta', 'pressao alta', 'has '],
+    keywords: [
+      'hipertens', 'hipertenso', 'hipertensa',
+      'press[aã]o\\s*(arterial\\s*)?(alta|elevada)',
+      '\\bp\\.?\\s*a\\.?\\s*(alta|elevada)\\b',
+      '\\bhas\\b', '\\bhta\\b',
+      'pressao do sangue alta', 'pressão do sangue alta',
+    ],
     medicamentos: [
       { nome: 'ibuprofeno', motivo: 'AINE eleva a pressão arterial e reduz efeito de anti-hipertensivos' },
       { nome: 'diclofenaco', motivo: 'AINE eleva a pressão arterial' },
@@ -93,7 +99,12 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Diabetes mellitus',
-    keywords: ['diabet', 'dm '],
+    keywords: [
+      'diabet', 'diabete', 'diabetico', 'diabetica',
+      '\\bdm\\b', '\\bdm\\s*(1|2|i|ii|tipo)',
+      'a[çc]ucar\\s*(alto|elevado)', 'glicemia\\s*alta', 'glicose\\s*alta',
+      'insulino\\s*dependente', 'insulinodependente',
+    ],
     medicamentos: [
       { nome: 'prednisona', motivo: 'Corticoide eleva significativamente a glicemia' },
       { nome: 'dexametasona', motivo: 'Corticoide eleva significativamente a glicemia' },
@@ -103,7 +114,11 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Asma / DPOC',
-    keywords: ['asma', 'dpoc', 'bronquit', 'enfisema'],
+    keywords: [
+      'asma', 'asmatic', '\\bdpoc\\b', 'bronquit', 'enfisema',
+      'doen[çc]a\\s*pulmonar\\s*obstrutiva', 'broncoespasmo',
+      'falta\\s*de\\s*ar\\s*cr[oô]nica', 'chiado\\s*no\\s*peito',
+    ],
     medicamentos: [
       { nome: 'propranolol', motivo: 'Betabloqueador não seletivo — pode desencadear broncoespasmo' },
       { nome: 'atenolol', motivo: 'Betabloqueador — risco de broncoespasmo' },
@@ -114,7 +129,13 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Insuficiência renal',
-    keywords: ['renal', 'irc', 'nefropat'],
+    keywords: [
+      'insufici[eê]ncia\\s*renal', 'insuf\\.?\\s*renal',
+      '\\birc\\b', '\\bdrc\\b', '\\blra\\b',
+      'nefropat', 'doen[çc]a\\s*renal', 'problema\\s*(no|nos)\\s*rim',
+      'rim\\s*(ruim|fraco|doente)', 'rins\\s*(ruins|fracos|doentes)',
+      'di[aá]lise', 'hemodi[aá]lise',
+    ],
     medicamentos: [
       { nome: 'ibuprofeno', motivo: 'AINE é nefrotóxico — agrava função renal' },
       { nome: 'diclofenaco', motivo: 'AINE é nefrotóxico' },
@@ -126,7 +147,12 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Insuficiência cardíaca',
-    keywords: ['insuficiência cardíaca', 'insuficiencia cardiaca', 'icc', 'cardiopat'],
+    keywords: [
+      'insufici[eê]ncia\\s*card[ií]aca', 'insuf\\.?\\s*card',
+      '\\bicc\\b', '\\bic\\s*(descompensada|congestiva)',
+      'cardiopat', 'problema\\s*(no\\s*)?cora[çc][aã]o',
+      'cora[çc][aã]o\\s*(fraco|dilatado|doente)',
+    ],
     medicamentos: [
       { nome: 'ibuprofeno', motivo: 'AINE causa retenção hídrica e descompensa IC' },
       { nome: 'diclofenaco', motivo: 'AINE causa retenção hídrica' },
@@ -136,7 +162,12 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Gestação',
-    keywords: ['gestant', 'grávid', 'gravid', 'gravidez'],
+    keywords: [
+      'gestant', 'gesta[çc][aã]o', 'gr[aá]vid', 'gravidez',
+      'gestando', 'esperando\\s*beb[eê]', '\\bgesta\\b',
+      'pr[eé]\\-?natal', 'pre\\s*natal',
+      '\\d+\\s*(semanas?|meses?)\\s*de\\s*gesta',
+    ],
     medicamentos: [
       { nome: 'misoprostol', motivo: 'Abortivo — contraindicado na gestação' },
       { nome: 'isotretinoína', motivo: 'Teratogênico' },
@@ -151,7 +182,12 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Úlcera / Gastrite',
-    keywords: ['úlcera', 'ulcera', 'gastrit', 'refluxo', 'drge'],
+    keywords: [
+      '[uú]lcera', 'gastrit', 'refluxo', '\\bdrge\\b',
+      'esofagit', 'azia', 'queima[çc][aã]o\\s*(no\\s*)?est[oô]mago',
+      'h\\.?\\s*pylori', 'helicobacter',
+      'dor\\s*no\\s*est[oô]mago\\s*cr[oô]nica',
+    ],
     medicamentos: [
       { nome: 'aspirina', motivo: 'AAS lesiona mucosa gástrica' },
       { nome: 'aas', motivo: 'AAS lesiona mucosa gástrica' },
@@ -163,7 +199,12 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
   {
     comorbidade: 'Hepatopatia',
-    keywords: ['hepat', 'fígado', 'figado', 'cirrose'],
+    keywords: [
+      'hepat', 'hepatite', 'f[ií]gado', 'cirrose',
+      'esteatose\\s*hep[aá]tica', 'doen[çc]a\\s*hep[aá]tica',
+      'problema\\s*(no\\s*)?f[ií]gado', 'f[ií]gado\\s*(ruim|gordo|doente)',
+      'insufici[eê]ncia\\s*hep[aá]tica',
+    ],
     medicamentos: [
       { nome: 'paracetamol', motivo: 'Hepatotóxico em doses elevadas — usar com cautela' },
       { nome: 'metotrexato', motivo: 'Hepatotóxico' },
@@ -173,11 +214,40 @@ export const CONTRAINDICACOES: Contraindicacao[] = [
   },
 ];
 
+// Normaliza texto: minúsculo, sem acentos, espaços colapsados
+function normalizar(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Compila um padrão (string keyword) em RegExp tolerante a acentos.
+// Aceita tanto strings simples (substring) quanto padrões regex (com \b, [], etc.)
+function compilarPadrao(pattern: string): RegExp {
+  // Remove acentos do próprio padrão para casar contra texto normalizado
+  const semAcento = pattern
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+  try {
+    return new RegExp(semAcento, 'i');
+  } catch {
+    // Se não for regex válida, escapa e usa como literal
+    const escaped = semAcento.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(escaped, 'i');
+  }
+}
+
 export function detectarComorbidades(texto: string): Contraindicacao[] {
   if (!texto) return [];
-  const t = texto.toLowerCase();
-  if (t.trim() === 'nenhuma') return [];
-  return CONTRAINDICACOES.filter(c => c.keywords.some(k => t.includes(k.toLowerCase())));
+  const t = normalizar(texto);
+  if (!t || t === 'nenhuma' || t === 'nenhum' || t === 'nao' || t === 'n/a') return [];
+  return CONTRAINDICACOES.filter(c =>
+    c.keywords.some(k => compilarPadrao(k).test(t))
+  );
 }
 
 export interface AlertaContraindicacao {
