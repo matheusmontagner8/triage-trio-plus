@@ -419,9 +419,16 @@ const Medico = () => {
             <button
               onClick={finalizarAtendimento}
               disabled={!diagnostico.trim() || alertasContraindicacao.length > 0}
-              className="w-full bg-primary text-primary-foreground rounded-[10px] py-3.5 text-sm font-semibold font-heading hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+              title={alertasContraindicacao.length > 0 ? 'Remova os medicamentos contraindicados antes de finalizar' : ''}
+              className={`w-full rounded-[10px] py-3.5 text-sm font-semibold font-heading transition-all disabled:cursor-not-allowed ${
+                alertasContraindicacao.length > 0
+                  ? 'bg-triage-red-bg border-2 border-triage-red-border text-triage-red disabled:opacity-100'
+                  : 'bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-40'
+              }`}
             >
-              Finalizar atendimento e salvar prescrição
+              {alertasContraindicacao.length > 0
+                ? `🚫 Bloqueado — ${alertasContraindicacao.length} medicamento(s) contraindicado(s)`
+                : 'Finalizar atendimento e salvar prescrição'}
             </button>
           </div>
         )}
