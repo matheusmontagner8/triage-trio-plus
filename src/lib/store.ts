@@ -81,7 +81,13 @@ export interface Contraindicacao {
 export const CONTRAINDICACOES: Contraindicacao[] = [
   {
     comorbidade: 'Hipertensão arterial',
-    keywords: ['hipertens', 'pressão alta', 'pressao alta', 'has '],
+    keywords: [
+      'hipertens', 'hipertenso', 'hipertensa',
+      'press[aã]o\\s*(arterial\\s*)?(alta|elevada)',
+      '\\bp\\.?\\s*a\\.?\\s*(alta|elevada)\\b',
+      '\\bhas\\b', '\\bhta\\b',
+      'pressao do sangue alta', 'pressão do sangue alta',
+    ],
     medicamentos: [
       { nome: 'ibuprofeno', motivo: 'AINE eleva a pressão arterial e reduz efeito de anti-hipertensivos' },
       { nome: 'diclofenaco', motivo: 'AINE eleva a pressão arterial' },
