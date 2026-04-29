@@ -381,18 +381,30 @@ const Medico = () => {
                   className={`w-full bg-surface2 border rounded-[10px] p-3 text-sm min-h-[70px] resize-none focus:outline-none focus:ring-1 placeholder:text-muted-foreground ${alertasContraindicacao.length > 0 ? 'border-triage-red-border focus:ring-triage-red' : 'border-border focus:ring-primary'}`}
                 />
                 {alertasContraindicacao.length > 0 && (
-                  <div className="mt-2 bg-triage-red-bg border border-triage-red-border rounded-[10px] p-3 text-[12px]">
-                    <div className="font-bold text-triage-red mb-1.5">
-                      🚫 Medicamentos contraindicados — não é possível finalizar
+                  <div className="mt-2 bg-triage-red-bg border-2 border-triage-red-border rounded-[10px] p-3.5">
+                    <div className="flex items-center gap-2 font-bold text-triage-red text-[13px] mb-2.5">
+                      <span className="text-base">🚫</span>
+                      <span>{alertasContraindicacao.length} medicamento{alertasContraindicacao.length > 1 ? 's' : ''} contraindicado{alertasContraindicacao.length > 1 ? 's' : ''} — corrija antes de finalizar</span>
                     </div>
-                    <ul className="space-y-1 text-triage-red">
+                    <ul className="space-y-2">
                       {alertasContraindicacao.map((a, i) => (
-                        <li key={i}>
-                          <strong className="capitalize">{a.medicamento}</strong> — {a.motivo}{' '}
-                          <span className="text-muted-foreground">({a.comorbidade})</span>
+                        <li key={i} className="bg-card border border-triage-red-border rounded-lg p-2.5 text-[12px]">
+                          <div className="flex items-start gap-2">
+                            <span className="text-triage-red font-bold shrink-0">●</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-bold capitalize text-foreground">{a.medicamento}</div>
+                              <div className="text-muted-foreground mt-0.5">{a.motivo}</div>
+                              <div className="mt-1 inline-block px-1.5 py-0.5 rounded bg-triage-red-bg text-triage-red text-[10px] font-semibold uppercase tracking-wide">
+                                Conflita com: {a.comorbidade}
+                              </div>
+                            </div>
+                          </div>
                         </li>
                       ))}
                     </ul>
+                    <div className="mt-2.5 text-[11px] text-muted-foreground">
+                      💡 Remova ou substitua os itens acima do campo de medicamentos para liberar a finalização.
+                    </div>
                   </div>
                 )}
               </div>
@@ -415,6 +427,27 @@ const Medico = () => {
                 />
               </div>
             </div>
+
+            {alertasContraindicacao.length > 0 && (
+              <div className="mb-3 bg-triage-red-bg border-2 border-triage-red-border rounded-[10px] p-3.5">
+                <div className="flex items-center gap-2 font-bold text-triage-red text-[13px] mb-2">
+                  <span>⚠</span>
+                  <span>Resumo do bloqueio ({alertasContraindicacao.length})</span>
+                </div>
+                <ul className="space-y-1 text-[12px]">
+                  {alertasContraindicacao.map((a, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-triage-red shrink-0">•</span>
+                      <span>
+                        <strong className="capitalize text-foreground">{a.medicamento}</strong>
+                        <span className="text-muted-foreground"> — {a.motivo} </span>
+                        <span className="text-triage-red font-semibold">({a.comorbidade})</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <button
               onClick={finalizarAtendimento}
