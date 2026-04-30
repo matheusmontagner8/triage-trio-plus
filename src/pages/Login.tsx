@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import { ESPECIALIDADES, setSession } from '@/lib/store';
@@ -35,6 +35,12 @@ const Login = () => {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   const navigate = useNavigate();
+
+  // Limpa a senha sempre que a tela de login é montada (ex.: após logout)
+  useEffect(() => {
+    setSenha('');
+    setErro('');
+  }, []);
 
   const handleLogin = () => {
     if (!role || !nome) return;
@@ -145,6 +151,9 @@ const Login = () => {
                   inputMode="numeric"
                   maxLength={4}
                   value={senha}
+                  autoComplete="new-password"
+                  autoCorrect="off"
+                  spellCheck={false}
                   onChange={(e) => { setSenha(e.target.value.replace(/\D/g, '')); setErro(''); }}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}
                   placeholder="••••"
