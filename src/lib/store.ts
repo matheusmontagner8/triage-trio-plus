@@ -783,3 +783,34 @@ export function fallbackTriage(
 
   return { cor, urgencia, tempo, alertas };
 }
+
+// ===== Cadastro de funcionários (persistido em localStorage) =====
+export interface FuncionarioCustom {
+  nome: string;
+  senha: string;
+  role: 'recepcao' | 'enfermagem' | 'medico';
+}
+
+const FUNC_KEY = 'triagem_funcionarios';
+
+export function getFuncionariosCustom(): FuncionarioCustom[] {
+  try {
+    const raw = localStorage.getItem(FUNC_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function addFuncionarioCustom(f: FuncionarioCustom): { ok: boolean; erro?: string } {
+  const nome = f.nome.trim();
+  if (!nome) return { ok: false, erro: 'Informe o nome do funcionário.' };
+  if (!/^\d{4}$/.test(f.senha)) return { ok: false, erro: 'A senha deve ter exatamente 4 dígitos numéricos.' };
+  const lista = getFuncionariosCustom();
+  if (lista.some((x) => x.nome.toLowerCase() === nome.toLowerCase())) {
+    return { ok: false, erro: 'Já existe um funcionário com esse nome.' };
+  }
+  lista.push({ ...f, nome });
+  localStorage.setItem(FUNC_KEY, JSON.stringify(lista));
+  return { ok: true };
+}
