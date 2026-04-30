@@ -363,20 +363,67 @@ const Medico = () => {
                 <label className="text-[11px] text-muted-foreground mb-1 block">
                   CID-10 ({session.especialidade})
                 </label>
+
+                {/* Filtros de busca + sistema */}
+                <div className="flex flex-col sm:flex-row gap-2 mb-2">
+                  <input
+                    value={cidBusca}
+                    onChange={e => setCidBusca(e.target.value)}
+                    placeholder="🔎 Buscar por código ou descrição (ex: J06, lombalgia, asma)"
+                    className="flex-1 bg-surface2 border border-border rounded-[10px] p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+                  />
+                  <select
+                    value={cidSistema}
+                    onChange={e => setCidSistema(e.target.value as CidSistema | 'Todos')}
+                    className="bg-surface2 border border-border rounded-[10px] p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    <option value="Todos">Todos os sistemas</option>
+                    {CID_SISTEMAS.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Lista de resultados */}
+                <div className="bg-surface2 border border-border rounded-[10px] max-h-48 overflow-y-auto mb-2">
+                  {cidFiltrados.length === 0 ? (
+                    <div className="p-3 text-[11px] text-muted-foreground text-center">
+                      Nenhum CID encontrado para os filtros atuais.
+                    </div>
+                  ) : (
+                    <ul className="divide-y divide-border">
+                      {cidFiltrados.map(c => {
+                        const valor = `${c.codigo} — ${c.descricao}`;
+                        const selecionado = cid === valor;
+                        return (
+                          <li key={c.codigo}>
+                            <button
+                              type="button"
+                              onClick={() => setCid(valor)}
+                              className={`w-full text-left px-3 py-2 text-[12px] hover:bg-surface3 transition-colors flex items-start gap-2 ${
+                                selecionado ? 'bg-primary/10 border-l-2 border-primary' : ''
+                              }`}
+                            >
+                              <span className="font-mono font-semibold text-primary min-w-[56px]">{c.codigo}</span>
+                              <span className="flex-1">{c.descricao}</span>
+                              <span className="text-[10px] text-muted-foreground whitespace-nowrap">{c.sistema}</span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Campo final (também aceita digitação manual) */}
                 <input
-                  list="cid-options"
                   value={cid}
                   onChange={e => setCid(e.target.value)}
-                  placeholder="Ex: J06.9 — selecione ou digite o código"
+                  placeholder="Selecione acima ou digite manualmente (ex: J06.9 — Infecção...)"
                   className="w-full bg-surface2 border border-border rounded-[10px] p-3 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
                 />
-                <datalist id="cid-options">
-                  {cidOptions.map(c => (
-                    <option key={c.codigo} value={`${c.codigo} — ${c.descricao}`} />
-                  ))}
-                </datalist>
                 <div className="text-[10px] text-muted-foreground mt-1">
-                  Sugestões frequentes em {session.especialidade} — você pode digitar outro código.
+                  {cidFiltrados.length} resultado(s) • Você pode digitar um CID livre se necessário.
                 </div>
               </div>
               <div>
