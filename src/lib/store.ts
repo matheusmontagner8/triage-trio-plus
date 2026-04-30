@@ -52,88 +52,119 @@ export const ESPECIALIDADES = [
   { id: 'pediatria', nome: 'Pediatria', desc: 'Saúde de crianças e adolescentes' },
 ];
 
-const CIDS_COMUNS = [
+export type CidSistema =
+  | 'Cardiovascular / Metabólico'
+  | 'Respiratório'
+  | 'Gastrointestinal'
+  | 'Urinário'
+  | 'Musculoesquelético'
+  | 'Neurológico'
+  | 'Saúde Mental'
+  | 'Pele'
+  | 'Sintomas Gerais'
+  | 'Rotina / Preventivo';
+
+export interface CidItem {
+  codigo: string;
+  descricao: string;
+  sistema: CidSistema;
+}
+
+const CIDS_COMUNS: CidItem[] = [
   // Cardiovascular / metabólico
-  { codigo: 'I10', descricao: 'Hipertensão essencial (primária)' },
-  { codigo: 'I11', descricao: 'Doença cardíaca hipertensiva' },
-  { codigo: 'I25', descricao: 'Doença isquêmica crônica do coração' },
-  { codigo: 'I50', descricao: 'Insuficiência cardíaca' },
-  { codigo: 'E11', descricao: 'Diabetes mellitus tipo 2' },
-  { codigo: 'E10', descricao: 'Diabetes mellitus tipo 1' },
-  { codigo: 'E78.0', descricao: 'Hipercolesterolemia pura' },
-  { codigo: 'E78.5', descricao: 'Dislipidemia não especificada' },
-  { codigo: 'E66', descricao: 'Obesidade' },
-  { codigo: 'E03.9', descricao: 'Hipotireoidismo não especificado' },
-  { codigo: 'E05.9', descricao: 'Hipertireoidismo não especificado' },
-  { codigo: 'E79.0', descricao: 'Hiperuricemia (gota)' },
+  { codigo: 'I10', descricao: 'Hipertensão essencial (primária)', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'I11', descricao: 'Doença cardíaca hipertensiva', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'I25', descricao: 'Doença isquêmica crônica do coração', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'I50', descricao: 'Insuficiência cardíaca', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'E11', descricao: 'Diabetes mellitus tipo 2', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'E10', descricao: 'Diabetes mellitus tipo 1', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'E78.0', descricao: 'Hipercolesterolemia pura', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'E78.5', descricao: 'Dislipidemia não especificada', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'E66', descricao: 'Obesidade', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'E03.9', descricao: 'Hipotireoidismo não especificado', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'E05.9', descricao: 'Hipertireoidismo não especificado', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'E79.0', descricao: 'Hiperuricemia (gota)', sistema: 'Cardiovascular / Metabólico' },
 
   // Respiratório
-  { codigo: 'J00', descricao: 'Rinofaringite aguda (resfriado comum)' },
-  { codigo: 'J02.9', descricao: 'Faringite aguda não especificada' },
-  { codigo: 'J03.9', descricao: 'Amigdalite aguda não especificada' },
-  { codigo: 'J06.9', descricao: 'Infecção aguda das vias aéreas superiores' },
-  { codigo: 'J20', descricao: 'Bronquite aguda' },
-  { codigo: 'J18.9', descricao: 'Pneumonia não especificada' },
-  { codigo: 'J45', descricao: 'Asma' },
-  { codigo: 'J44', descricao: 'DPOC (doença pulmonar obstrutiva crônica)' },
-  { codigo: 'J30.4', descricao: 'Rinite alérgica não especificada' },
-  { codigo: 'J01.9', descricao: 'Sinusite aguda não especificada' },
+  { codigo: 'J00', descricao: 'Rinofaringite aguda (resfriado comum)', sistema: 'Respiratório' },
+  { codigo: 'J02.9', descricao: 'Faringite aguda não especificada', sistema: 'Respiratório' },
+  { codigo: 'J03.9', descricao: 'Amigdalite aguda não especificada', sistema: 'Respiratório' },
+  { codigo: 'J06.9', descricao: 'Infecção aguda das vias aéreas superiores', sistema: 'Respiratório' },
+  { codigo: 'J20', descricao: 'Bronquite aguda', sistema: 'Respiratório' },
+  { codigo: 'J18.9', descricao: 'Pneumonia não especificada', sistema: 'Respiratório' },
+  { codigo: 'J45', descricao: 'Asma', sistema: 'Respiratório' },
+  { codigo: 'J44', descricao: 'DPOC (doença pulmonar obstrutiva crônica)', sistema: 'Respiratório' },
+  { codigo: 'J30.4', descricao: 'Rinite alérgica não especificada', sistema: 'Respiratório' },
+  { codigo: 'J01.9', descricao: 'Sinusite aguda não especificada', sistema: 'Respiratório' },
 
   // Gastrointestinal
-  { codigo: 'A09', descricao: 'Diarreia e gastroenterite de origem infecciosa presumível' },
-  { codigo: 'K21', descricao: 'Doença do refluxo gastroesofágico (DRGE)' },
-  { codigo: 'K29.7', descricao: 'Gastrite não especificada' },
-  { codigo: 'K30', descricao: 'Dispepsia funcional' },
-  { codigo: 'K59.0', descricao: 'Constipação intestinal' },
-  { codigo: 'K58', descricao: 'Síndrome do intestino irritável' },
+  { codigo: 'A09', descricao: 'Diarreia e gastroenterite de origem infecciosa presumível', sistema: 'Gastrointestinal' },
+  { codigo: 'K21', descricao: 'Doença do refluxo gastroesofágico (DRGE)', sistema: 'Gastrointestinal' },
+  { codigo: 'K29.7', descricao: 'Gastrite não especificada', sistema: 'Gastrointestinal' },
+  { codigo: 'K30', descricao: 'Dispepsia funcional', sistema: 'Gastrointestinal' },
+  { codigo: 'K59.0', descricao: 'Constipação intestinal', sistema: 'Gastrointestinal' },
+  { codigo: 'K58', descricao: 'Síndrome do intestino irritável', sistema: 'Gastrointestinal' },
 
   // Urinário
-  { codigo: 'N39.0', descricao: 'Infecção do trato urinário (ITU)' },
-  { codigo: 'N20.0', descricao: 'Cálculo renal' },
+  { codigo: 'N39.0', descricao: 'Infecção do trato urinário (ITU)', sistema: 'Urinário' },
+  { codigo: 'N20.0', descricao: 'Cálculo renal', sistema: 'Urinário' },
 
   // Musculoesquelético / dor
-  { codigo: 'M54.5', descricao: 'Lombalgia' },
-  { codigo: 'M54.2', descricao: 'Cervicalgia' },
-  { codigo: 'M25.5', descricao: 'Dor articular' },
-  { codigo: 'M79.1', descricao: 'Mialgia' },
-  { codigo: 'M19.9', descricao: 'Osteoartrose não especificada' },
-  { codigo: 'M06.9', descricao: 'Artrite reumatoide não especificada' },
-  { codigo: 'M81.9', descricao: 'Osteoporose não especificada' },
+  { codigo: 'M54.5', descricao: 'Lombalgia', sistema: 'Musculoesquelético' },
+  { codigo: 'M54.2', descricao: 'Cervicalgia', sistema: 'Musculoesquelético' },
+  { codigo: 'M25.5', descricao: 'Dor articular', sistema: 'Musculoesquelético' },
+  { codigo: 'M79.1', descricao: 'Mialgia', sistema: 'Musculoesquelético' },
+  { codigo: 'M19.9', descricao: 'Osteoartrose não especificada', sistema: 'Musculoesquelético' },
+  { codigo: 'M06.9', descricao: 'Artrite reumatoide não especificada', sistema: 'Musculoesquelético' },
+  { codigo: 'M81.9', descricao: 'Osteoporose não especificada', sistema: 'Musculoesquelético' },
 
   // Neurológico
-  { codigo: 'G43.9', descricao: 'Enxaqueca não especificada' },
-  { codigo: 'G44.2', descricao: 'Cefaleia tensional' },
-  { codigo: 'R51', descricao: 'Cefaleia' },
-  { codigo: 'G47.0', descricao: 'Distúrbios do início e manutenção do sono (insônia)' },
+  { codigo: 'G43.9', descricao: 'Enxaqueca não especificada', sistema: 'Neurológico' },
+  { codigo: 'G44.2', descricao: 'Cefaleia tensional', sistema: 'Neurológico' },
+  { codigo: 'R51', descricao: 'Cefaleia', sistema: 'Neurológico' },
+  { codigo: 'G47.0', descricao: 'Distúrbios do início e manutenção do sono (insônia)', sistema: 'Neurológico' },
 
   // Saúde mental
-  { codigo: 'F32', descricao: 'Episódio depressivo' },
-  { codigo: 'F41.1', descricao: 'Transtorno de ansiedade generalizada' },
-  { codigo: 'F41.0', descricao: 'Transtorno de pânico' },
-  { codigo: 'F43.0', descricao: 'Reação aguda ao estresse' },
+  { codigo: 'F32', descricao: 'Episódio depressivo', sistema: 'Saúde Mental' },
+  { codigo: 'F41.1', descricao: 'Transtorno de ansiedade generalizada', sistema: 'Saúde Mental' },
+  { codigo: 'F41.0', descricao: 'Transtorno de pânico', sistema: 'Saúde Mental' },
+  { codigo: 'F43.0', descricao: 'Reação aguda ao estresse', sistema: 'Saúde Mental' },
 
   // Pele
-  { codigo: 'L20', descricao: 'Dermatite atópica' },
-  { codigo: 'L23', descricao: 'Dermatite de contato alérgica' },
-  { codigo: 'L30.9', descricao: 'Dermatite não especificada' },
-  { codigo: 'B02', descricao: 'Herpes zoster' },
+  { codigo: 'L20', descricao: 'Dermatite atópica', sistema: 'Pele' },
+  { codigo: 'L23', descricao: 'Dermatite de contato alérgica', sistema: 'Pele' },
+  { codigo: 'L30.9', descricao: 'Dermatite não especificada', sistema: 'Pele' },
+  { codigo: 'B02', descricao: 'Herpes zoster', sistema: 'Pele' },
 
   // Sintomas gerais
-  { codigo: 'R50.9', descricao: 'Febre não especificada' },
-  { codigo: 'R10.4', descricao: 'Dor abdominal não especificada' },
-  { codigo: 'R11', descricao: 'Náusea e vômito' },
-  { codigo: 'R05', descricao: 'Tosse' },
-  { codigo: 'R42', descricao: 'Tontura e instabilidade' },
-  { codigo: 'R53', descricao: 'Mal-estar e fadiga' },
-  { codigo: 'D50.9', descricao: 'Anemia por deficiência de ferro não especificada' },
+  { codigo: 'R50.9', descricao: 'Febre não especificada', sistema: 'Sintomas Gerais' },
+  { codigo: 'R10.4', descricao: 'Dor abdominal não especificada', sistema: 'Sintomas Gerais' },
+  { codigo: 'R11', descricao: 'Náusea e vômito', sistema: 'Sintomas Gerais' },
+  { codigo: 'R05', descricao: 'Tosse', sistema: 'Sintomas Gerais' },
+  { codigo: 'R42', descricao: 'Tontura e instabilidade', sistema: 'Sintomas Gerais' },
+  { codigo: 'R53', descricao: 'Mal-estar e fadiga', sistema: 'Sintomas Gerais' },
+  { codigo: 'D50.9', descricao: 'Anemia por deficiência de ferro não especificada', sistema: 'Sintomas Gerais' },
 
   // Rotina / preventivo
-  { codigo: 'Z00.0', descricao: 'Exame médico geral (consulta de rotina)' },
-  { codigo: 'Z13', descricao: 'Exames especiais de rastreamento (screening)' },
-  { codigo: 'Z76.3', descricao: 'Pessoa em situação saudável acompanhando enfermo' },
+  { codigo: 'Z00.0', descricao: 'Exame médico geral (consulta de rotina)', sistema: 'Rotina / Preventivo' },
+  { codigo: 'Z13', descricao: 'Exames especiais de rastreamento (screening)', sistema: 'Rotina / Preventivo' },
+  { codigo: 'Z76.3', descricao: 'Pessoa em situação saudável acompanhando enfermo', sistema: 'Rotina / Preventivo' },
 ];
 
-export const CID_POR_ESPECIALIDADE: Record<string, { codigo: string; descricao: string }[]> = {
+export const CID_SISTEMAS: CidSistema[] = [
+  'Cardiovascular / Metabólico',
+  'Respiratório',
+  'Gastrointestinal',
+  'Urinário',
+  'Musculoesquelético',
+  'Neurológico',
+  'Saúde Mental',
+  'Pele',
+  'Sintomas Gerais',
+  'Rotina / Preventivo',
+];
+
+export const CID_POR_ESPECIALIDADE: Record<string, CidItem[]> = {
   'Clínica Médica': CIDS_COMUNS,
   'Pediatria': CIDS_COMUNS,
 };
