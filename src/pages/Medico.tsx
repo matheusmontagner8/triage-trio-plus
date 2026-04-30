@@ -22,12 +22,27 @@ const Medico = () => {
   const [atendendo, setAtendendo] = useState(false);
   const [diagnostico, setDiagnostico] = useState('');
   const [cid, setCid] = useState('');
+  const [cidBusca, setCidBusca] = useState('');
+  const [cidSistema, setCidSistema] = useState<CidSistema | 'Todos'>('Todos');
   const [tempoSintomas, setTempoSintomas] = useState('');
   const [medicamentos, setMedicamentos] = useState('');
   const [procedimentos, setProcedimentos] = useState('');
   const [observacoes, setObservacoes] = useState('');
 
   const cidOptions = CID_POR_ESPECIALIDADE[session?.especialidade || ''] || [];
+
+  const normalizar = (s: string) =>
+    s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  const cidFiltrados = cidOptions.filter(c => {
+    if (cidSistema !== 'Todos' && c.sistema !== cidSistema) return false;
+    const termo = normalizar(cidBusca.trim());
+    if (!termo) return true;
+    return (
+      normalizar(c.codigo).includes(termo) ||
+      normalizar(c.descricao).includes(termo)
+    );
+  });
 
   useEffect(() => {
     if (!session || session.role !== 'medico') {
