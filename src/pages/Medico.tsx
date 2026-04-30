@@ -103,6 +103,8 @@ const Medico = () => {
     setAtendendo(false);
     setDiagnostico('');
     setCid('');
+    setCidBusca('');
+    setCidSistema('Todos');
     setTempoSintomas('');
     setMedicamentos('');
     setProcedimentos('');
