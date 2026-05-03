@@ -1,13 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
-import {
-  ESPECIALIDADES,
-  setSession,
-  getFuncionariosCustom,
-  addFuncionarioCustom,
-  type FuncionarioCustom,
-} from '@/lib/store';
+import { ESPECIALIDADES, setSession } from '@/lib/store';
 
 const FUNCIONARIOS_RECEPCAO = ['Ana Santos'];
 const FUNCIONARIOS_ENFERMAGEM = ['Carlos Oliveira', 'Mariana Silva'];
@@ -20,7 +14,7 @@ const FUNCIONARIOS_MEDICOS = [
   'Dra. Camila Ferreira',
 ];
 
-const SENHAS_PADRAO: Record<string, string> = {
+const SENHAS: Record<string, string> = {
   'Ana Santos': '1111',
   'Carlos Oliveira': '2222',
   'Mariana Silva': '3333',
@@ -40,33 +34,18 @@ const Login = () => {
   const [especialidade, setEspecialidade] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
-  const [customs, setCustoms] = useState<FuncionarioCustom[]>([]);
   const navigate = useNavigate();
 
-  // Cadastro
-  const [showCadastro, setShowCadastro] = useState(false);
-  const [novoNome, setNovoNome] = useState('');
-  const [novaSenha, setNovaSenha] = useState('');
-  const [novoRole, setNovoRole] = useState<Role | ''>('');
-  const [cadastroErro, setCadastroErro] = useState('');
-  const [cadastroOk, setCadastroOk] = useState('');
-
+  // Limpa a senha sempre que a tela de login é montada (ex.: após logout)
   useEffect(() => {
     setSenha('');
     setErro('');
-    setCustoms(getFuncionariosCustom());
   }, []);
-
-  const senhasMap = useMemo(() => {
-    const map: Record<string, string> = { ...SENHAS_PADRAO };
-    customs.forEach((c) => { map[c.nome] = c.senha; });
-    return map;
-  }, [customs]);
 
   const handleLogin = () => {
     if (!role || !nome) return;
     if (role === 'medico' && !especialidade) return;
-    if (senhasMap[nome] !== senha) {
+    if (SENHAS[nome] !== senha) {
       setErro('Senha incorreta. Tente novamente.');
       return;
     }
@@ -77,17 +56,6 @@ const Login = () => {
     else navigate('/medico');
   };
 
-  const handleCadastrar = () => {
-    setCadastroErro('');
-    setCadastroOk('');
-    if (!novoRole) { setCadastroErro('Selecione o setor de trabalho.'); return; }
-    const res = addFuncionarioCustom({ nome: novoNome, senha: novaSenha, role: novoRole });
-    if (!res.ok) { setCadastroErro(res.erro || 'Não foi possível cadastrar.'); return; }
-    setCustoms(getFuncionariosCustom());
-    setCadastroOk(`Funcionário "${novoNome.trim()}" cadastrado com sucesso!`);
-    setNovoNome(''); setNovaSenha(''); setNovoRole('');
-  };
-
   const roles: { id: Role; label: string; icon: string; desc: string }[] = [
     { id: 'recepcao', label: 'Recepção', icon: '🏥', desc: 'Cadastro de pacientes' },
     { id: 'enfermagem', label: 'Triagem de Enfermagem', icon: '💉', desc: 'Sinais vitais e classificação' },
@@ -95,12 +63,9 @@ const Login = () => {
   ];
 
   const getNomes = () => {
-    let base: string[] = [];
-    if (role === 'recepcao') base = [...FUNCIONARIOS_RECEPCAO];
-    else if (role === 'enfermagem') base = [...FUNCIONARIOS_ENFERMAGEM];
-    else if (role === 'medico') base = [...FUNCIONARIOS_MEDICOS];
-    const extras = customs.filter((c) => c.role === role).map((c) => c.nome);
-    return [...base, ...extras];
+    if (role === 'recepcao') return FUNCIONARIOS_RECEPCAO;
+    if (role === 'enfermagem') return FUNCIONARIOS_ENFERMAGEM;
+    return FUNCIONARIOS_MEDICOS;
   };
 
   return (
@@ -207,88 +172,6 @@ const Login = () => {
             </button>
           </>
         )}
-
-        {/* ===== Cadastro de novo funcionário ===== */}
-        <div className="mt-8 pt-6 border-t border-border">
-          <button
-            type="button"
-            onClick={() => { setShowCadastro((v) => !v); setCadastroErro(''); setCadastroOk(''); }}
-            className="w-full flex items-center justify-between text-sm font-semibold text-foreground hover:text-primary transition-colors"
-          >
-            <span className="flex items-center gap-2">
-              <span className="text-base">➕</span> Cadastrar novo funcionário
-            </span>
-            <span className="text-muted-foreground text-xs">{showCadastro ? '▲' : '▼'}</span>
-          </button>
-
-          {showCadastro && (
-            <div className="mt-4 space-y-3">
-              <div>
-                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">
-                  Nome completo
-                </label>
-                <input
-                  type="text"
-                  value={novoNome}
-                  onChange={(e) => setNovoNome(e.target.value)}
-                  placeholder="Ex: Dra. Maria Souza"
-                  className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">
-                  Senha (4 dígitos)
-                </label>
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={4}
-                  autoComplete="new-password"
-                  value={novaSenha}
-                  onChange={(e) => setNovaSenha(e.target.value.replace(/\D/g, ''))}
-                  placeholder="••••"
-                  className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary tracking-[0.5em] text-center"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">
-                  Setor de trabalho
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {roles.map((r) => (
-                    <button
-                      key={r.id}
-                      type="button"
-                      onClick={() => setNovoRole(r.id)}
-                      className={`p-2.5 rounded-lg border text-center transition-all ${
-                        novoRole === r.id
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border bg-surface2 hover:border-muted-foreground/30'
-                      }`}
-                    >
-                      <div className="text-base">{r.icon}</div>
-                      <div className="text-[11px] font-semibold mt-0.5">{r.label}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {cadastroErro && <p className="text-xs text-destructive">{cadastroErro}</p>}
-              {cadastroOk && <p className="text-xs text-emerald-500">{cadastroOk}</p>}
-
-              <button
-                type="button"
-                onClick={handleCadastrar}
-                disabled={!novoNome.trim() || novaSenha.length !== 4 || !novoRole}
-                className="w-full bg-secondary text-secondary-foreground rounded-[10px] py-3 text-sm font-semibold font-heading disabled:opacity-40 transition-opacity hover:opacity-90"
-              >
-                Cadastrar funcionário
-              </button>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

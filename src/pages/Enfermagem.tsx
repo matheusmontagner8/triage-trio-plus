@@ -2,13 +2,20 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import TriageProtocol from '@/components/TriageProtocol';
-import { getAllPacientes, updateFicha, fallbackTriage, getSession, clearSession, type Paciente } from '@/lib/store';
+import { 
+  getAllPacientes, 
+  updateFicha, 
+  processarTriagemGemini, 
+  getSession, 
+  clearSession,
+  type Paciente 
+} from '@/lib/store';
 
 const COLOR_MAP: Record<string, { dot: string; bg: string; border: string; text: string }> = {
-  VERMELHO: { dot: 'bg-triage-red', bg: 'bg-triage-red-bg', border: 'border-triage-red-border', text: 'text-triage-red' },
-  LARANJA: { dot: 'bg-triage-orange', bg: 'bg-triage-orange-bg', border: 'border-triage-orange-border', text: 'text-triage-orange' },
-  AMARELO: { dot: 'bg-triage-yellow', bg: 'bg-triage-yellow-bg', border: 'border-triage-yellow-border', text: 'text-triage-yellow' },
-  VERDE: { dot: 'bg-triage-green', bg: 'bg-triage-green-bg', border: 'border-triage-green-border', text: 'text-triage-green' },
+  VERMELHO: { dot: 'bg-red-500', bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700' },
+  LARANJA: { dot: 'bg-orange-500', bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700' },
+  AMARELO: { dot: 'bg-yellow-500', bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700' },
+  VERDE: { dot: 'bg-green-500', bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700' },
 };
 
 const Enfermagem = () => {
@@ -16,214 +23,169 @@ const Enfermagem = () => {
   const session = getSession();
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [selected, setSelected] = useState<Paciente | null>(null);
-  const [temp, setTemp] = useState('');
-  const [bpSys, setBpSys] = useState('');
-  const [bpDia, setBpDia] = useState('');
-  const [satO2, setSatO2] = useState('');
-  const [fc, setFc] = useState('');
-  const [glicemia, setGlicemia] = useState('');
-  const [fr, setFr] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [vitais, setVitais] = useState({ temp: '', sys: '', dia: '', sat: '', fc: '', gli: '', fr: '' });
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState(false);
-  const [resultadoTriagem, setResultadoTriagem] = useState<{ cor: string; urgencia: string; tempo: string; alertas: string[] } | null>(null);
+  const [resultadoTriagem, setResultadoTriagem] = useState<any>(null);
 
   useEffect(() => {
-    if (!session || session.role !== 'enfermagem') {
-      navigate('/');
-      return;
-    }
+    if (!session || session.role !== 'enfermagem') { navigate('/'); return; }
     refreshList();
-    const interval = setInterval(refreshList, 3000);
-    return () => clearInterval(interval);
   }, []);
 
-  const refreshList = () => {
-    const all = getAllPacientes().filter(p => !p.triado);
-    setPacientes(all);
-  };
+  const refreshList = () => setPacientes(getAllPacientes().filter(p => !p.triado));
 
-  const clearForm = () => {
-    setTemp(''); setBpSys(''); setBpDia(''); setSatO2(''); setFc(''); setGlicemia(''); setFr('');
-  };
+ const salvarSinais = async () => {
+  if (!selected) return;
+  
+  // Bloqueia múltiplas tentativas
+  setLoading(true);
+  setErro('');
 
-  const salvarSinais = () => {
-    setErro('');
-    if (!selected) return;
-    if (!temp) { setErro('Informe a temperatura.'); return; }
-    if (!bpSys || !bpDia) { setErro('Informe a pressão arterial.'); return; }
-    if (!satO2) { setErro('Informe a saturação de oxigênio.'); return; }
-    if (!fc) { setErro('Informe a frequência cardíaca.'); return; }
-    if (!glicemia) { setErro('Informe a glicemia (dextro).'); return; }
-    if (!fr) { setErro('Informe a frequência respiratória.'); return; }
+  try {
+    // Validação básica: impede envio se campos críticos estiverem vazios
+    if (!vitais.temp || !vitais.sys || !vitais.dia) {
+      throw new Error("Preencha ao menos Temperatura e Pressão Arterial.");
+    }
 
-    const tempVal = parseFloat(temp);
-    const sysVal = parseInt(bpSys);
-    const diaVal = parseInt(bpDia);
-    const satVal = parseFloat(satO2);
-    const fcVal = parseInt(fc);
-    const gliVal = parseFloat(glicemia);
-    const frVal = parseInt(fr);
+    // Preparação dos dados para a IA (Evitando zeros irreais com undefined)
+    const sinaisFormatados = {
+      temperatura: parseFloat(vitais.temp) || undefined,
+      pressaoSistolica: parseInt(vitais.sys) || undefined,
+      pressaoDiastolica: parseInt(vitais.dia) || undefined,
+      saturacaoO2: parseFloat(vitais.sat) || undefined,
+      frequenciaCardiaca: parseInt(vitais.fc) || undefined,
+      glicemia: parseFloat(vitais.gli) || undefined,
+      frequenciaRespiratoria: parseInt(vitais.fr) || undefined,
+    };
 
-    // Run triage classification
-    const triagem = fallbackTriage(tempVal, sysVal, diaVal, satVal, fcVal, gliVal, frVal);
+    // Usando variável de ambiente para proteger a chave
+    const apiKey = "AIzaSyAYgw8Qaw4IvwmezYhymP_WkSmfMkRDFgA"; 
+    
+    if (!apiKey) {
+        throw new Error("API Key não configurada. Verifique suas variáveis de ambiente.");
+    }
 
+    // Chamada para o Motor de IA
+    const respostaIA = await processarTriagemGemini(
+      { ...selected, ...sinaisFormatados }, 
+      apiKey
+    );
+
+    // PERSISTÊNCIA LOCAL: Salva no "banco" (localStorage) e marca como triado
     updateFicha(selected.codigo, {
-      temperatura: tempVal,
-      pressaoSistolica: sysVal,
-      pressaoDiastolica: diaVal,
-      saturacaoO2: satVal,
-      frequenciaCardiaca: fcVal,
-      glicemia: gliVal,
-      frequenciaRespiratoria: frVal,
-      triado: true,
-      triagem,
+      ...sinaisFormatados,
+      triagem: respostaIA,
+      triado: true 
     });
 
-    setResultadoTriagem(triagem);
+    // Atualiza o estado visual
+    setResultadoTriagem(respostaIA);
     setSucesso(true);
+
+    // Limpa a seleção após um tempo para o usuário ver o resultado
     setTimeout(() => {
+      refreshList(); // Recarrega a fila (removendo o paciente já triado)
       setSelected(null);
-      clearForm();
       setSucesso(false);
-      setResultadoTriagem(null);
-      refreshList();
+      setVitais({ temp: '', sys: '', dia: '', sat: '', fc: '', gli: '', fr: '' });
     }, 4000);
-  };
 
-  if (!session || session.role !== 'enfermagem') return null;
+  } catch (err: any) {
+    setErro(err.message || "Falha ao processar dados.");
+    console.error("Erro na triagem:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const colors = resultadoTriagem ? COLOR_MAP[resultadoTriagem.cor] || COLOR_MAP.VERDE : null;
+  const colors = resultadoTriagem ? COLOR_MAP[resultadoTriagem.cor] : null;
 
   return (
-    <div className="grid grid-cols-[280px_1fr] min-h-screen">
-      {/* Sidebar */}
-      <aside className="bg-surface border-r border-border p-8 flex flex-col gap-7 sticky top-0 h-screen overflow-y-auto">
+    <div className="flex min-h-screen bg-background">
+      <aside className="w-72 border-r p-8 bg-card flex flex-col gap-6">
         <Logo subtitle="Enfermagem" />
         <TriageProtocol />
-        <div className="mt-auto text-[10px] text-muted-foreground leading-relaxed">
-          Triagem de enfermagem — {session.nome}
-          <br />
-          <button onClick={() => navigate('/dashboard')} className="text-primary hover:underline mt-2 inline-block mr-3">📊 Histórico</button>
-          <button onClick={() => { clearSession(); navigate('/'); }} className="text-primary hover:underline mt-2 inline-block">Sair</button>
-        </div>
+        <button onClick={() => { clearSession(); navigate('/'); }} className="mt-auto text-sm text-primary hover:underline">Sair</button>
       </aside>
 
-      {/* Main */}
-      <main className="p-10 max-w-[900px]">
-        <h1 className="font-heading text-[28px] font-extrabold mb-1.5">Triagem de Enfermagem</h1>
-        <p className="text-sm text-muted-foreground mb-8">Selecione um paciente, registre os sinais vitais e a classificação será gerada automaticamente.</p>
+      <main className="flex-1 p-10">
+        <h1 className="text-2xl font-bold mb-8">Triagem de Pacientes</h1>
 
-        {/* Patient list */}
-        <div className="bg-card border border-border rounded-2xl p-6 mb-8">
-          <div className="font-heading font-bold text-[15px] mb-4">
-            Pacientes aguardando ({pacientes.length})
+        <div className="grid grid-cols-2 gap-8">
+          <div className="space-y-4">
+            <h2 className="font-semibold">Fila de Espera</h2>
+            {pacientes.map(p => (
+              <div 
+                key={p.codigo} 
+                onClick={() => setSelected(p)}
+                className={`p-4 border rounded-xl cursor-pointer transition-all ${selected?.codigo === p.codigo ? 'border-primary bg-primary/5' : 'bg-card'}`}
+              >
+                <p className="font-bold">{p.nome}</p>
+                <p className="text-xs text-muted-foreground">{p.sintomas}</p>
+              </div>
+            ))}
           </div>
-          {pacientes.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4">Nenhum paciente aguardando triagem.</p>
-          ) : (
-            <div className="space-y-2">
-              {pacientes.map((p) => (
-                <button
-                  key={p.codigo}
-                  onClick={() => { setSelected(p); setSucesso(false); setErro(''); setResultadoTriagem(null); clearForm(); }}
-                  className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
-                    selected?.codigo === p.codigo ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground/30'
-                  }`}
+
+          <div className="bg-card border rounded-2xl p-6">
+            {selected ? (
+              <>
+                <h3 className="font-bold mb-4">Sinais Vitais - {selected.nome}</h3>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                    <input 
+                      placeholder="Temp (°C)" 
+                      className="border p-2 rounded" 
+                      value={vitais.temp} 
+                      onChange={e => setVitais({...vitais, temp: e.target.value})} 
+                    />
+                    <input 
+                      placeholder="PA Sistólica" 
+                      className="border p-2 rounded" 
+                      value={vitais.sys} 
+                      onChange={e => setVitais({...vitais, sys: e.target.value})} 
+                    />
+                    <input 
+                      placeholder="PA Diastólica" 
+                      className="border p-2 rounded" 
+                      value={vitais.dia} 
+                      onChange={e => setVitais({...vitais, dia: e.target.value})} 
+                    />
+                    <input 
+                      placeholder="Saturação O2" 
+                      className="border p-2 rounded" 
+                      value={vitais.sat} 
+                      onChange={e => setVitais({...vitais, sat: e.target.value})} 
+                    />
+                    {/* NOVO INPUT ADICIONADO ABAIXO */}
+                    <input 
+                      placeholder="Frequência Cardíaca" 
+                      className="border p-2 rounded" 
+                      value={vitais.fc} 
+                      onChange={e => setVitais({...vitais, fc: e.target.value})} 
+                    />
+                  </div>
+                
+                {erro && <p className="text-red-500 text-sm mb-4">{erro}</p>}
+
+                <button 
+                  disabled={loading}
+                  onClick={salvarSinais}
+                  className="w-full bg-primary text-white py-3 rounded-lg font-bold"
                 >
-                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-heading font-bold text-sm shrink-0">
-                    {p.nome.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('')}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold truncate">{p.nome}</div>
-                    <div className="text-xs text-muted-foreground">{p.idade} anos · Código: <span className="font-mono text-primary">{p.codigo}</span></div>
-                  </div>
+                  {loading ? "PROCESSANDO..." : "CLASSIFICAR COM IA"}
                 </button>
-              ))}
-            </div>
-          )}
-        </div>
+              </>
+            ) : <p className="text-muted-foreground">Selecione um paciente na fila.</p>}
 
-        {/* Vital signs form */}
-        {selected && !sucesso && (
-          <div className="bg-card border border-border rounded-2xl p-6">
-            <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-3 flex items-center gap-2">
-              Sinais vitais — {selected.nome} <span className="flex-1 h-px bg-border" />
-            </div>
-
-            <div className="mb-4 p-3 bg-surface2 rounded-lg border border-border">
-              <div className="text-xs text-muted-foreground mb-1">Sintomas relatados</div>
-              <div className="text-sm">{selected.sintomas}</div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3.5 mb-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-muted-foreground font-medium">Temperatura (°C)</label>
-                <input type="number" value={temp} onChange={(e) => setTemp(e.target.value)} placeholder="36.5" step={0.1}
-                  className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors" />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-muted-foreground font-medium">Pressão sistólica (mmHg)</label>
-                <input type="number" value={bpSys} onChange={(e) => setBpSys(e.target.value)} placeholder="120"
-                  className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors" />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-muted-foreground font-medium">Pressão diastólica (mmHg)</label>
-                <input type="number" value={bpDia} onChange={(e) => setBpDia(e.target.value)} placeholder="80"
-                  className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors" />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-muted-foreground font-medium">Saturação O₂ (%)</label>
-                <input type="number" value={satO2} onChange={(e) => setSatO2(e.target.value)} placeholder="98"
-                  className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors" />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-muted-foreground font-medium">Frequência cardíaca (bpm)</label>
-                <input type="number" value={fc} onChange={(e) => setFc(e.target.value)} placeholder="80"
-                  className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors" />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-muted-foreground font-medium">Glicemia / Dextro (mg/dL)</label>
-                <input type="number" value={glicemia} onChange={(e) => setGlicemia(e.target.value)} placeholder="100"
-                  className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors" />
-              </div>
-              <div className="flex flex-col gap-1.5 col-span-3">
-                <label className="text-xs text-muted-foreground font-medium">Frequência respiratória (irpm)</label>
-                <input type="number" value={fr} onChange={(e) => setFr(e.target.value)} placeholder="18"
-                  className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors max-w-[calc(33.33%-0.583rem)]" />
-              </div>
-            </div>
-
-            {erro && <p className="text-destructive text-sm mb-3">{erro}</p>}
-
-            <button onClick={salvarSinais}
-              className="w-full bg-primary text-primary-foreground rounded-[10px] py-3.5 text-sm font-semibold font-heading hover:opacity-90 transition-opacity">
-              Salvar sinais vitais e classificar
-            </button>
-          </div>
-        )}
-
-        {sucesso && resultadoTriagem && colors && (
-          <div className={`${colors.bg} border ${colors.border} rounded-xl p-6 text-center relative overflow-hidden`}>
-            <div className={`absolute top-0 left-0 right-0 h-[3px] ${colors.dot}`} />
-            <div className="text-3xl mb-2">✓</div>
-            <div className={`font-heading font-bold text-lg ${colors.text}`}>Triagem concluída!</div>
-            <div className="mt-3 flex items-center justify-center gap-3">
-              <span className={`inline-block px-4 py-1.5 rounded-full font-mono text-sm border ${colors.border} ${colors.text} font-bold`}>
-                {resultadoTriagem.cor}
-              </span>
-              <span className="text-sm text-muted-foreground">—</span>
-              <span className="text-sm font-semibold">{resultadoTriagem.urgencia}</span>
-              <span className="text-sm text-muted-foreground">—</span>
-              <span className="text-sm">Espera: <strong>{resultadoTriagem.tempo}</strong></span>
-            </div>
-            {resultadoTriagem.alertas.length > 0 && (
-              <div className="mt-3 text-sm text-triage-red font-semibold">
-                ⚠ {resultadoTriagem.alertas.join(' · ')}
+            {sucesso && colors && (
+              <div className={`mt-6 p-4 rounded-lg border ${colors.bg} ${colors.border} text-center animate-bounce`}>
+                <p className={`font-black ${colors.text}`}>CLASSIFICAÇÃO: {resultadoTriagem.cor}</p>
+                <p className="text-sm">Tempo de espera: {resultadoTriagem.tempo}</p>
               </div>
             )}
-            <p className="text-sm text-muted-foreground mt-3">Paciente encaminhado para atendimento médico.</p>
           </div>
-        )}
+        </div>
       </main>
     </div>
   );
