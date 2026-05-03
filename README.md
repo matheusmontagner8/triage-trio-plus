@@ -565,7 +565,7 @@ Este projeto demonstra:
 
 ## 📝 Changelog
 
-### v0.0.0 (Atual)
+### v0.0.1 (Atual)
 - ✨ Inicialização do projeto
 - ✨ Sistema de autenticação
 - ✨ Módulo de Recepção
