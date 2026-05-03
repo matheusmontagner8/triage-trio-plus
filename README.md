@@ -222,7 +222,7 @@ npm run test:watch
 
 ```
 ┌─────────────┐
-│   Login     │  Autenticação por perfil
+│   Login     │  Autenticação por perfil (por motivos de teste)
 └──────┬──────┘
        │
        ├─────────────────────────────────┐
@@ -232,9 +232,9 @@ npm run test:watch
    │Recepção│                      │Enfermagem│
    └────┬───┘                      └─────┬────┘
         │                                │
-        │ 1. Cadastrar paciente         │ 2. Medir sinais vitais
-        │ 2. Coletar sintomas           │ 3. Classificar urgência
-        │ 3. Documentar alergias        │ 4. Gerar alertas
+        │ 1.1. Cadastrar paciente         │ 1.2. Medir sinais vitais
+        │ 2.1. Coletar sintomas           │ 2.2. Classificar urgência
+        │ 3.1. Documentar alergias        │ 3.2.. Gerar alertas
         │                                │
         └──────────────┬─────────────────┘
                        │
@@ -248,9 +248,9 @@ npm run test:watch
                        │ 6. Prescrever
                        │
                        v
-                  ┌──────────┐
-                  │   Alta   │
-                  └──────────┘
+                  ┌────────────────┐
+                  │   Finalizar    │
+                  └────────────────┘
 ```
 
 ---
