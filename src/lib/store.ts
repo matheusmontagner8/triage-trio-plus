@@ -864,6 +864,24 @@ export function clearSession() {
   localStorage.removeItem('triagem_session');
 }
 
+export type FuncionarioRole = 'recepcao' | 'enfermagem' | 'medico';
+export interface FuncionarioCustom {
+  nome: string;
+  senha: string;
+  role: FuncionarioRole;
+}
+
+export function getFuncionariosCustom(): FuncionarioCustom[] {
+  const s = localStorage.getItem('triagem_funcionarios');
+  return s ? JSON.parse(s) : [];
+}
+
+export function addFuncionarioCustom(f: FuncionarioCustom) {
+  const list = getFuncionariosCustom();
+  list.push(f);
+  localStorage.setItem('triagem_funcionarios', JSON.stringify(list));
+}
+
 export async function processarTriagemGemini(paciente: Paciente, apiKey: string) {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ 
