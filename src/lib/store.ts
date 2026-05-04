@@ -171,9 +171,101 @@ export const CID_SISTEMAS: CidSistema[] = [
   'Rotina / Preventivo',
 ];
 
+const CIDS_PSIQUIATRIA: CidItem[] = [
+  { codigo: 'F32', descricao: 'Episódio depressivo', sistema: 'Saúde Mental' },
+  { codigo: 'F33', descricao: 'Transtorno depressivo recorrente', sistema: 'Saúde Mental' },
+  { codigo: 'F41.1', descricao: 'Transtorno de ansiedade generalizada', sistema: 'Saúde Mental' },
+  { codigo: 'F41.0', descricao: 'Transtorno de pânico', sistema: 'Saúde Mental' },
+  { codigo: 'F43.0', descricao: 'Reação aguda ao estresse', sistema: 'Saúde Mental' },
+  { codigo: 'F43.1', descricao: 'Transtorno de estresse pós-traumático', sistema: 'Saúde Mental' },
+  { codigo: 'F31', descricao: 'Transtorno afetivo bipolar', sistema: 'Saúde Mental' },
+  { codigo: 'F20', descricao: 'Esquizofrenia', sistema: 'Saúde Mental' },
+  { codigo: 'F90', descricao: 'Transtornos hipercinéticos (TDAH)', sistema: 'Saúde Mental' },
+  { codigo: 'F10', descricao: 'Transtornos por uso de álcool', sistema: 'Saúde Mental' },
+  { codigo: 'F19', descricao: 'Transtornos por uso de múltiplas substâncias', sistema: 'Saúde Mental' },
+  { codigo: 'F50', descricao: 'Transtornos da alimentação', sistema: 'Saúde Mental' },
+  { codigo: 'G47.0', descricao: 'Insônia', sistema: 'Neurológico' },
+];
+
+const CIDS_CIRURGIA: CidItem[] = [
+  { codigo: 'K35', descricao: 'Apendicite aguda', sistema: 'Gastrointestinal' },
+  { codigo: 'K40', descricao: 'Hérnia inguinal', sistema: 'Gastrointestinal' },
+  { codigo: 'K42', descricao: 'Hérnia umbilical', sistema: 'Gastrointestinal' },
+  { codigo: 'K43', descricao: 'Hérnia ventral', sistema: 'Gastrointestinal' },
+  { codigo: 'K80', descricao: 'Colelitíase', sistema: 'Gastrointestinal' },
+  { codigo: 'K81', descricao: 'Colecistite', sistema: 'Gastrointestinal' },
+  { codigo: 'K57', descricao: 'Doença diverticular do intestino', sistema: 'Gastrointestinal' },
+  { codigo: 'K60', descricao: 'Fissura e fístula anal', sistema: 'Gastrointestinal' },
+  { codigo: 'K61', descricao: 'Abscesso anal e retal', sistema: 'Gastrointestinal' },
+  { codigo: 'K64', descricao: 'Hemorroidas', sistema: 'Gastrointestinal' },
+  { codigo: 'L02', descricao: 'Abscesso cutâneo, furúnculo e antraz', sistema: 'Pele' },
+  { codigo: 'L05', descricao: 'Cisto pilonidal', sistema: 'Pele' },
+  { codigo: 'S00-T98', descricao: 'Lesões traumáticas diversas', sistema: 'Sintomas Gerais' },
+];
+
+const CIDS_GINECOLOGIA: CidItem[] = [
+  { codigo: 'N91', descricao: 'Menstruação ausente, escassa ou rara', sistema: 'Urinário' },
+  { codigo: 'N92', descricao: 'Menstruação excessiva, frequente ou irregular', sistema: 'Urinário' },
+  { codigo: 'N94', descricao: 'Dor e outras condições do ciclo menstrual', sistema: 'Urinário' },
+  { codigo: 'N95', descricao: 'Transtornos da menopausa', sistema: 'Urinário' },
+  { codigo: 'N76', descricao: 'Vaginite e vulvite', sistema: 'Urinário' },
+  { codigo: 'N73', descricao: 'Doença inflamatória pélvica', sistema: 'Urinário' },
+  { codigo: 'N80', descricao: 'Endometriose', sistema: 'Urinário' },
+  { codigo: 'N83', descricao: 'Cisto de ovário', sistema: 'Urinário' },
+  { codigo: 'N84', descricao: 'Pólipo do trato genital feminino', sistema: 'Urinário' },
+  { codigo: 'D25', descricao: 'Mioma uterino (leiomioma)', sistema: 'Urinário' },
+  { codigo: 'N97', descricao: 'Infertilidade feminina', sistema: 'Urinário' },
+  { codigo: 'Z30', descricao: 'Anticoncepção', sistema: 'Rotina / Preventivo' },
+  { codigo: 'Z01.4', descricao: 'Exame ginecológico de rotina', sistema: 'Rotina / Preventivo' },
+];
+
+const CIDS_ORTOPEDIA: CidItem[] = [
+  { codigo: 'M54.5', descricao: 'Lombalgia', sistema: 'Musculoesquelético' },
+  { codigo: 'M54.2', descricao: 'Cervicalgia', sistema: 'Musculoesquelético' },
+  { codigo: 'M54.4', descricao: 'Lumbago com ciática', sistema: 'Musculoesquelético' },
+  { codigo: 'M51', descricao: 'Transtornos de discos intervertebrais', sistema: 'Musculoesquelético' },
+  { codigo: 'M17', descricao: 'Gonartrose (artrose do joelho)', sistema: 'Musculoesquelético' },
+  { codigo: 'M16', descricao: 'Coxartrose (artrose do quadril)', sistema: 'Musculoesquelético' },
+  { codigo: 'M19.9', descricao: 'Osteoartrose não especificada', sistema: 'Musculoesquelético' },
+  { codigo: 'M75', descricao: 'Lesões do ombro', sistema: 'Musculoesquelético' },
+  { codigo: 'M77', descricao: 'Outras entesopatias (epicondilite, fascite)', sistema: 'Musculoesquelético' },
+  { codigo: 'M23', descricao: 'Transtorno interno do joelho', sistema: 'Musculoesquelético' },
+  { codigo: 'M81.9', descricao: 'Osteoporose não especificada', sistema: 'Musculoesquelético' },
+  { codigo: 'S52', descricao: 'Fratura do antebraço', sistema: 'Musculoesquelético' },
+  { codigo: 'S82', descricao: 'Fratura da perna, incluindo tornozelo', sistema: 'Musculoesquelético' },
+  { codigo: 'S83', descricao: 'Luxação/entorse do joelho', sistema: 'Musculoesquelético' },
+  { codigo: 'S93', descricao: 'Luxação/entorse do tornozelo e do pé', sistema: 'Musculoesquelético' },
+];
+
+const CIDS_OBSTETRICIA: CidItem[] = [
+  { codigo: 'Z34', descricao: 'Supervisão de gravidez normal', sistema: 'Rotina / Preventivo' },
+  { codigo: 'Z35', descricao: 'Supervisão de gravidez de alto risco', sistema: 'Rotina / Preventivo' },
+  { codigo: 'O10', descricao: 'Hipertensão pré-existente na gravidez', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'O13', descricao: 'Hipertensão gestacional', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'O14', descricao: 'Pré-eclâmpsia', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'O15', descricao: 'Eclâmpsia', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'O24', descricao: 'Diabetes mellitus na gravidez', sistema: 'Cardiovascular / Metabólico' },
+  { codigo: 'O20', descricao: 'Hemorragia no início da gravidez', sistema: 'Sintomas Gerais' },
+  { codigo: 'O21', descricao: 'Vômitos excessivos na gravidez (hiperêmese)', sistema: 'Gastrointestinal' },
+  { codigo: 'O23', descricao: 'Infecções do trato geniturinário na gravidez', sistema: 'Urinário' },
+  { codigo: 'O26', descricao: 'Assistência prestada à mãe por outras complicações', sistema: 'Rotina / Preventivo' },
+  { codigo: 'O30', descricao: 'Gestação múltipla', sistema: 'Rotina / Preventivo' },
+  { codigo: 'O36', descricao: 'Assistência por anormalidades fetais', sistema: 'Rotina / Preventivo' },
+  { codigo: 'O42', descricao: 'Ruptura prematura de membranas', sistema: 'Sintomas Gerais' },
+  { codigo: 'O47', descricao: 'Falso trabalho de parto', sistema: 'Sintomas Gerais' },
+  { codigo: 'O80', descricao: 'Parto único espontâneo', sistema: 'Rotina / Preventivo' },
+  { codigo: 'O82', descricao: 'Parto único por cesariana', sistema: 'Rotina / Preventivo' },
+  { codigo: 'Z39', descricao: 'Exame e cuidados no pós-parto', sistema: 'Rotina / Preventivo' },
+];
+
 export const CID_POR_ESPECIALIDADE: Record<string, CidItem[]> = {
   'Clínica Médica': CIDS_COMUNS,
   'Pediatria': CIDS_COMUNS,
+  'Psiquiatria': CIDS_PSIQUIATRIA,
+  'Cirurgia Geral': CIDS_CIRURGIA,
+  'Ginecologia': CIDS_GINECOLOGIA,
+  'Ortopedia': CIDS_ORTOPEDIA,
+  'Obstetrícia': CIDS_OBSTETRICIA,
 };
 
 // ============================================================================
