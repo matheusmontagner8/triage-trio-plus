@@ -207,6 +207,73 @@ const Login = () => {
             </button>
           </>
         )}
+
+        {/* Cadastro de novo funcionário */}
+        <div className="mt-8 pt-6 border-t border-border">
+          <button
+            type="button"
+            onClick={() => setShowCadastro((v) => !v)}
+            className="w-full text-left text-xs font-semibold tracking-wider uppercase text-muted-foreground hover:text-foreground transition-colors flex items-center justify-between"
+          >
+            <span>➕ Cadastrar novo funcionário</span>
+            <span className="text-base">{showCadastro ? '−' : '+'}</span>
+          </button>
+
+          {showCadastro && (
+            <div className="mt-4 grid gap-3">
+              <div>
+                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">Nome</label>
+                <input
+                  type="text"
+                  value={novoNome}
+                  onChange={(e) => setNovoNome(e.target.value)}
+                  placeholder="Nome completo"
+                  className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">Senha (4 dígitos)</label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={novaSenha}
+                  onChange={(e) => setNovaSenha(e.target.value.replace(/\D/g, ''))}
+                  placeholder="••••"
+                  className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary mt-1 tracking-[0.5em] text-center"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">Setor</label>
+                <div className="grid grid-cols-3 gap-2 mt-1">
+                  {(['recepcao', 'enfermagem', 'medico'] as FuncionarioRole[]).map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setNovoRole(r)}
+                      className={`p-2 rounded-lg border text-xs font-semibold transition-all ${
+                        novoRole === r
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border bg-surface2 hover:border-muted-foreground/30'
+                      }`}
+                    >
+                      {r === 'recepcao' ? 'Recepção' : r === 'enfermagem' ? 'Triagem' : 'Médico'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {cadErro && <p className="text-xs text-destructive">{cadErro}</p>}
+              {cadOk && <p className="text-xs text-green-600">{cadOk}</p>}
+              <button
+                type="button"
+                onClick={handleCadastrar}
+                className="w-full bg-secondary text-secondary-foreground rounded-[10px] py-2.5 text-sm font-semibold font-heading hover:opacity-90 transition-opacity"
+              >
+                Cadastrar funcionário
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
