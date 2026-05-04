@@ -61,7 +61,7 @@ const Enfermagem = () => {
     };
 
     // Usando variável de ambiente para proteger a chave
-    const apiKey = "AIzaSyAYgw8Qaw4IvwmezYhymP_WkSmfMkRDFgA"; 
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY; 
     
     if (!apiKey) {
         throw new Error("API Key não configurada. Verifique suas variáveis de ambiente.");
@@ -135,32 +135,32 @@ const Enfermagem = () => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                     <input 
                       placeholder="Temp (°C)" 
-                      className="border p-2 rounded" 
+                      className="border border-zinc-300 p-2 rounded bg-white text-black placeholder:text-zinc-400 outline-none focus:border-black"
                       value={vitais.temp} 
                       onChange={e => setVitais({...vitais, temp: e.target.value})} 
                     />
                     <input 
                       placeholder="PA Sistólica" 
-                      className="border p-2 rounded" 
+                      className="border border-zinc-300 p-2 rounded bg-white text-black placeholder:text-zinc-400 outline-none focus:border-black"
                       value={vitais.sys} 
                       onChange={e => setVitais({...vitais, sys: e.target.value})} 
                     />
                     <input 
                       placeholder="PA Diastólica" 
-                      className="border p-2 rounded" 
+                      className="border border-zinc-300 p-2 rounded bg-white text-black placeholder:text-zinc-400 outline-none focus:border-black" 
                       value={vitais.dia} 
                       onChange={e => setVitais({...vitais, dia: e.target.value})} 
                     />
                     <input 
                       placeholder="Saturação O2" 
-                      className="border p-2 rounded" 
+                      className="border border-zinc-300 p-2 rounded bg-white text-black placeholder:text-zinc-400 outline-none focus:border-black" 
                       value={vitais.sat} 
                       onChange={e => setVitais({...vitais, sat: e.target.value})} 
                     />
                     {/* NOVO INPUT ADICIONADO ABAIXO */}
                     <input 
                       placeholder="Frequência Cardíaca" 
-                      className="border p-2 rounded" 
+                      className="border border-zinc-300 p-2 rounded bg-white text-black placeholder:text-zinc-400 outline-none focus:border-black" 
                       value={vitais.fc} 
                       onChange={e => setVitais({...vitais, fc: e.target.value})} 
                     />

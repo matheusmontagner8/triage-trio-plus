@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
-import { ESPECIALIDADES, setSession, getFuncionariosCustom, addFuncionarioCustom, type FuncionarioRole } from '@/lib/store';
+import { ESPECIALIDADES, setSession } from '@/lib/store';
 
 const FUNCIONARIOS_RECEPCAO = ['Ana Santos'];
 const FUNCIONARIOS_ENFERMAGEM = ['Carlos Oliveira', 'Mariana Silva'];
@@ -34,33 +34,18 @@ const Login = () => {
   const [especialidade, setEspecialidade] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
-  const [customs, setCustoms] = useState(() => getFuncionariosCustom());
-
-  // Cadastro
-  const [showCadastro, setShowCadastro] = useState(false);
-  const [novoNome, setNovoNome] = useState('');
-  const [novaSenha, setNovaSenha] = useState('');
-  const [novoRole, setNovoRole] = useState<FuncionarioRole | ''>('');
-  const [cadErro, setCadErro] = useState('');
-  const [cadOk, setCadOk] = useState('');
-
   const navigate = useNavigate();
 
+  // Limpa a senha sempre que a tela de login é montada (ex.: após logout)
   useEffect(() => {
     setSenha('');
     setErro('');
   }, []);
 
-  const senhasMap = useMemo(() => {
-    const map: Record<string, string> = { ...SENHAS };
-    customs.forEach((f) => { map[f.nome] = f.senha; });
-    return map;
-  }, [customs]);
-
   const handleLogin = () => {
     if (!role || !nome) return;
     if (role === 'medico' && !especialidade) return;
-    if (senhasMap[nome] !== senha) {
+    if (SENHAS[nome] !== senha) {
       setErro('Senha incorreta. Tente novamente.');
       return;
     }
@@ -71,25 +56,6 @@ const Login = () => {
     else navigate('/medico');
   };
 
-  const handleCadastrar = () => {
-    setCadErro(''); setCadOk('');
-    const n = novoNome.trim();
-    if (!n) return setCadErro('Informe o nome.');
-    if (!/^\d{4}$/.test(novaSenha)) return setCadErro('Senha deve ter 4 dígitos numéricos.');
-    if (!novoRole) return setCadErro('Selecione o setor.');
-    const todos = [
-      ...FUNCIONARIOS_RECEPCAO, ...FUNCIONARIOS_ENFERMAGEM, ...FUNCIONARIOS_MEDICOS,
-      ...customs.map((c) => c.nome),
-    ];
-    if (todos.some((x) => x.toLowerCase() === n.toLowerCase())) {
-      return setCadErro('Já existe um funcionário com esse nome.');
-    }
-    addFuncionarioCustom({ nome: n, senha: novaSenha, role: novoRole });
-    setCustoms(getFuncionariosCustom());
-    setCadOk(`Funcionário "${n}" cadastrado com sucesso!`);
-    setNovoNome(''); setNovaSenha(''); setNovoRole('');
-  };
-
   const roles: { id: Role; label: string; icon: string; desc: string }[] = [
     { id: 'recepcao', label: 'Recepção', icon: '🏥', desc: 'Cadastro de pacientes' },
     { id: 'enfermagem', label: 'Triagem de Enfermagem', icon: '💉', desc: 'Sinais vitais e classificação' },
@@ -97,10 +63,9 @@ const Login = () => {
   ];
 
   const getNomes = () => {
-    const extras = customs.filter((c) => c.role === role).map((c) => c.nome);
-    if (role === 'recepcao') return [...FUNCIONARIOS_RECEPCAO, ...extras];
-    if (role === 'enfermagem') return [...FUNCIONARIOS_ENFERMAGEM, ...extras];
-    return [...FUNCIONARIOS_MEDICOS, ...extras];
+    if (role === 'recepcao') return FUNCIONARIOS_RECEPCAO;
+    if (role === 'enfermagem') return FUNCIONARIOS_ENFERMAGEM;
+    return FUNCIONARIOS_MEDICOS;
   };
 
   return (
@@ -207,73 +172,6 @@ const Login = () => {
             </button>
           </>
         )}
-
-        {/* Cadastro de novo funcionário */}
-        <div className="mt-8 pt-6 border-t border-border">
-          <button
-            type="button"
-            onClick={() => setShowCadastro((v) => !v)}
-            className="w-full text-left text-xs font-semibold tracking-wider uppercase text-muted-foreground hover:text-foreground transition-colors flex items-center justify-between"
-          >
-            <span>➕ Cadastrar novo funcionário</span>
-            <span className="text-base">{showCadastro ? '−' : '+'}</span>
-          </button>
-
-          {showCadastro && (
-            <div className="mt-4 grid gap-3">
-              <div>
-                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">Nome</label>
-                <input
-                  type="text"
-                  value={novoNome}
-                  onChange={(e) => setNovoNome(e.target.value)}
-                  placeholder="Nome completo"
-                  className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary mt-1"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">Senha (4 dígitos)</label>
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={4}
-                  value={novaSenha}
-                  onChange={(e) => setNovaSenha(e.target.value.replace(/\D/g, ''))}
-                  placeholder="••••"
-                  className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary mt-1 tracking-[0.5em] text-center"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">Setor</label>
-                <div className="grid grid-cols-3 gap-2 mt-1">
-                  {(['recepcao', 'enfermagem', 'medico'] as FuncionarioRole[]).map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setNovoRole(r)}
-                      className={`p-2 rounded-lg border text-xs font-semibold transition-all ${
-                        novoRole === r
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border bg-surface2 hover:border-muted-foreground/30'
-                      }`}
-                    >
-                      {r === 'recepcao' ? 'Recepção' : r === 'enfermagem' ? 'Triagem' : 'Médico'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {cadErro && <p className="text-xs text-destructive">{cadErro}</p>}
-              {cadOk && <p className="text-xs text-green-600">{cadOk}</p>}
-              <button
-                type="button"
-                onClick={handleCadastrar}
-                className="w-full bg-secondary text-secondary-foreground rounded-[10px] py-2.5 text-sm font-semibold font-heading hover:opacity-90 transition-opacity"
-              >
-                Cadastrar funcionário
-              </button>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
