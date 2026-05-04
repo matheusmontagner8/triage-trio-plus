@@ -49,6 +49,30 @@ export interface UserSession {
   especialidade?: string;
 }
 
+export type FuncionarioRole = 'recepcao' | 'enfermagem' | 'medico';
+export interface FuncionarioCustom {
+  nome: string;
+  senha: string;
+  role: FuncionarioRole;
+}
+
+const FUNCIONARIOS_KEY = 'triagem_funcionarios';
+
+export function getFuncionariosCustom(): FuncionarioCustom[] {
+  try {
+    const raw = localStorage.getItem(FUNCIONARIOS_KEY);
+    return raw ? (JSON.parse(raw) as FuncionarioCustom[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function addFuncionarioCustom(f: FuncionarioCustom) {
+  const all = getFuncionariosCustom();
+  all.push(f);
+  localStorage.setItem(FUNCIONARIOS_KEY, JSON.stringify(all));
+}
+
 export const ESPECIALIDADES = [
   { id: 'clinica', nome: 'Clínica Médica', desc: 'Atendimento geral e integral' },
   { id: 'pediatria', nome: 'Pediatria', desc: 'Saúde de crianças e adolescentes' },
