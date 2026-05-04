@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
-import { ESPECIALIDADES, setSession } from '@/lib/store';
+import { ESPECIALIDADES, setSession, getFuncionariosCustom, addFuncionarioCustom, type FuncionarioRole } from '@/lib/store';
 
 const FUNCIONARIOS_RECEPCAO = ['Ana Santos'];
 const FUNCIONARIOS_ENFERMAGEM = ['Carlos Oliveira', 'Mariana Silva'];
