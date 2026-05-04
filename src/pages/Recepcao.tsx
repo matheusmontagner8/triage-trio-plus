@@ -76,7 +76,7 @@ const Recepcao = () => {
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-muted-foreground font-medium">
                   <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface2 border border-border text-[10px] font-bold text-muted-foreground mr-1.5">1</span>
-                  NOME COMPLETO
+                  Nome completo
                 </label>
                 <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Maria Aparecida Silva"
                   className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors" />
@@ -84,7 +84,7 @@ const Recepcao = () => {
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-muted-foreground font-medium">
                   <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface2 border border-border text-[10px] font-bold text-muted-foreground mr-1.5">2</span>
-                  IDADE
+                  Idade
                 </label>
                 <input type="number" value={idade} onChange={(e) => setIdade(e.target.value)} placeholder="Ex: 45" min={0} max={130}
                   className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors" />
@@ -92,13 +92,13 @@ const Recepcao = () => {
             </div>
 
             <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-3.5 flex items-center gap-2">
-              SAÚDE E SINTOMAS <span className="flex-1 h-px bg-border" />
+              Saúde e sintomas <span className="flex-1 h-px bg-border" />
             </div>
             <div className="space-y-3.5">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-muted-foreground font-medium">
                   <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface2 border border-border text-[10px] font-bold text-muted-foreground mr-1.5">3</span>
-                  DESCREVA O QUE ESTÁ SENTINDO
+                  Sintomas que está sentindo
                 </label>
                 <textarea value={sintomas} onChange={(e) => setSintomas(e.target.value)} placeholder="Descreva o que está sentindo: dor, tontura, febre, etc."
                   className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors resize-y min-h-[80px] leading-relaxed" />
@@ -106,7 +106,7 @@ const Recepcao = () => {
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-muted-foreground font-medium">
                   <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface2 border border-border text-[10px] font-bold text-muted-foreground mr-1.5">4</span>
-                  POSSUI ALGUMA ALERGIA A ALGUM MEDICAMENTO?
+                  Possui alergia a algum medicamento?
                 </label>
                 <select value={alergia} onChange={(e) => { setAlergia(e.target.value); if (e.target.value === 'Não') setAlergiaQual(''); }}
                   className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors">
@@ -116,8 +116,8 @@ const Recepcao = () => {
               </div>
               {alergia === 'Sim' && (
                 <div className="flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-1">
-                  <label className="text-xs text-muted-foreground">QUAL(IS) MEDICAMENTO(S))</label>
-                  <textarea value={alergiaQual} onChange={(e) => setAlergiaQual(e.target.value)} placeholder="Ex: Dipirona, Penicilina..."
+                  <label className="text-xs text-muted-foreground">Qual(is) medicamento(s)?</label>
+                  <input value={alergiaQual} onChange={(e) => setAlergiaQual(e.target.value)} placeholder="Ex: Dipirona, Penicilina..."
                     className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors" />
                   <span className="text-[11px] text-muted-foreground">Separe por vírgula se houver mais de um.</span>
                 </div>
@@ -125,9 +125,9 @@ const Recepcao = () => {
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-muted-foreground font-medium">
                   <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface2 border border-border text-[10px] font-bold text-muted-foreground mr-1.5">5</span>
-                  DOENÇAS OU COMORBIDADES JÁ PRESENTES
+                  Doenças ou comorbidades pré-existentes
                 </label>
-                <textarea value={comorbidade} onChange={(e) => setComorbidade(e.target.value)} placeholder="Ex: Diabetes, Hipertensão..."
+                <input value={comorbidade} onChange={(e) => setComorbidade(e.target.value)} placeholder="Ex: Diabetes, Hipertensão..."
                   className="bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-accent transition-colors" />
               </div>
             </div>
