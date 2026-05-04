@@ -34,18 +34,33 @@ const Login = () => {
   const [especialidade, setEspecialidade] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
+  const [customs, setCustoms] = useState(() => getFuncionariosCustom());
+
+  // Cadastro
+  const [showCadastro, setShowCadastro] = useState(false);
+  const [novoNome, setNovoNome] = useState('');
+  const [novaSenha, setNovaSenha] = useState('');
+  const [novoRole, setNovoRole] = useState<FuncionarioRole | ''>('');
+  const [cadErro, setCadErro] = useState('');
+  const [cadOk, setCadOk] = useState('');
+
   const navigate = useNavigate();
 
-  // Limpa a senha sempre que a tela de login é montada (ex.: após logout)
   useEffect(() => {
     setSenha('');
     setErro('');
   }, []);
 
+  const senhasMap = useMemo(() => {
+    const map: Record<string, string> = { ...SENHAS };
+    customs.forEach((f) => { map[f.nome] = f.senha; });
+    return map;
+  }, [customs]);
+
   const handleLogin = () => {
     if (!role || !nome) return;
     if (role === 'medico' && !especialidade) return;
-    if (SENHAS[nome] !== senha) {
+    if (senhasMap[nome] !== senha) {
       setErro('Senha incorreta. Tente novamente.');
       return;
     }
@@ -56,6 +71,25 @@ const Login = () => {
     else navigate('/medico');
   };
 
+  const handleCadastrar = () => {
+    setCadErro(''); setCadOk('');
+    const n = novoNome.trim();
+    if (!n) return setCadErro('Informe o nome.');
+    if (!/^\d{4}$/.test(novaSenha)) return setCadErro('Senha deve ter 4 dígitos numéricos.');
+    if (!novoRole) return setCadErro('Selecione o setor.');
+    const todos = [
+      ...FUNCIONARIOS_RECEPCAO, ...FUNCIONARIOS_ENFERMAGEM, ...FUNCIONARIOS_MEDICOS,
+      ...customs.map((c) => c.nome),
+    ];
+    if (todos.some((x) => x.toLowerCase() === n.toLowerCase())) {
+      return setCadErro('Já existe um funcionário com esse nome.');
+    }
+    addFuncionarioCustom({ nome: n, senha: novaSenha, role: novoRole });
+    setCustoms(getFuncionariosCustom());
+    setCadOk(`Funcionário "${n}" cadastrado com sucesso!`);
+    setNovoNome(''); setNovaSenha(''); setNovoRole('');
+  };
+
   const roles: { id: Role; label: string; icon: string; desc: string }[] = [
     { id: 'recepcao', label: 'Recepção', icon: '🏥', desc: 'Cadastro de pacientes' },
     { id: 'enfermagem', label: 'Triagem de Enfermagem', icon: '💉', desc: 'Sinais vitais e classificação' },
@@ -63,9 +97,10 @@ const Login = () => {
   ];
 
   const getNomes = () => {
-    if (role === 'recepcao') return FUNCIONARIOS_RECEPCAO;
-    if (role === 'enfermagem') return FUNCIONARIOS_ENFERMAGEM;
-    return FUNCIONARIOS_MEDICOS;
+    const extras = customs.filter((c) => c.role === role).map((c) => c.nome);
+    if (role === 'recepcao') return [...FUNCIONARIOS_RECEPCAO, ...extras];
+    if (role === 'enfermagem') return [...FUNCIONARIOS_ENFERMAGEM, ...extras];
+    return [...FUNCIONARIOS_MEDICOS, ...extras];
   };
 
   return (
