@@ -52,6 +52,11 @@ export interface UserSession {
 export const ESPECIALIDADES = [
   { id: 'clinica', nome: 'Clínica Médica', desc: 'Atendimento geral e integral' },
   { id: 'pediatria', nome: 'Pediatria', desc: 'Saúde de crianças e adolescentes' },
+  { id: 'psiquiatria', nome: 'Psiquiatria', desc: 'Saúde mental e transtornos psíquicos' },
+  { id: 'cirurgia', nome: 'Cirurgia Geral', desc: 'Procedimentos cirúrgicos gerais' },
+  { id: 'ginecologia', nome: 'Ginecologia', desc: 'Saúde da mulher' },
+  { id: 'ortopedia', nome: 'Ortopedia', desc: 'Sistema musculoesquelético' },
+  { id: 'obstetricia', nome: 'Obstetrícia', desc: 'Gestação, parto e puerpério' },
 ];
 
 export type CidSistema =
