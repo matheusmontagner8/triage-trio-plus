@@ -213,9 +213,14 @@ const Medico = () => {
         {/* Queue */}
         {!atendendo && (
           <div className="bg-card border border-border rounded-2xl p-6 mb-8">
-            <div className="font-heading font-bold text-[15px] mb-4">
+            <div className="font-heading font-bold text-[15px] mb-2">
               Fila de atendimento ({fila.length})
             </div>
+            {!['Pediatria', 'Ortopedia'].includes(session?.especialidade || '') && (
+              <p className="text-[11px] text-muted-foreground mb-3">
+                ℹ Pacientes de 0 a 10 anos são direcionados apenas para Pediatria ou Ortopedia.
+              </p>
+            )}
             {fila.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4">Nenhum paciente aguardando atendimento.</p>
             ) : (
