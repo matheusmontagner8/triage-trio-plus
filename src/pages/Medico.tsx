@@ -55,8 +55,17 @@ const Medico = () => {
   }, []);
 
   const refreshFila = () => {
+    const esp = session?.especialidade || '';
+    const especialidadesPediatricas = ['Pediatria', 'Ortopedia'];
     const triados = getAllPacientes()
       .filter(p => p.triado && p.triagem && !p.chamado)
+      .filter(p => {
+        const idadeNum = parseInt(p.idade);
+        if (!isNaN(idadeNum) && idadeNum >= 0 && idadeNum <= 10) {
+          return especialidadesPediatricas.includes(esp);
+        }
+        return true;
+      })
       .sort((a, b) => {
         const prioA = PRIORITY_ORDER.indexOf(a.triagem!.cor);
         const prioB = PRIORITY_ORDER.indexOf(b.triagem!.cor);
