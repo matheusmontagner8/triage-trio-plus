@@ -19,6 +19,7 @@ const FUNCIONARIOS_MEDICOS = [
   'Dr. André Barbosa',
   'Dra. Camila Ferreira',
 ];
+const FUNCIONARIOS_ADMIN = ['Administrador'];
 
 const SENHAS_PADRAO: Record<string, string> = {
   'Ana Santos': '1111',
@@ -30,9 +31,11 @@ const SENHAS_PADRAO: Record<string, string> = {
   'Dra. Juliana Rocha': '7777',
   'Dr. André Barbosa': '8888',
   'Dra. Camila Ferreira': '9999',
+  'Administrador': '0000',
 };
 
-type Role = 'recepcao' | 'enfermagem' | 'medico';
+type Role = 'recepcao' | 'enfermagem' | 'medico' | 'admin';
+type FuncRole = 'recepcao' | 'enfermagem' | 'medico';
 
 const Login = () => {
   const [role, setRole] = useState<Role | null>(null);
@@ -41,13 +44,13 @@ const Login = () => {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   const [customs, setCustoms] = useState<FuncionarioCustom[]>([]);
+  const [adminLogado, setAdminLogado] = useState(false);
   const navigate = useNavigate();
 
   // Cadastro
-  const [showCadastro, setShowCadastro] = useState(false);
   const [novoNome, setNovoNome] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
-  const [novoRole, setNovoRole] = useState<Role | ''>('');
+  const [novoRole, setNovoRole] = useState<FuncRole | ''>('');
   const [cadastroErro, setCadastroErro] = useState('');
   const [cadastroOk, setCadastroOk] = useState('');
 
@@ -71,6 +74,10 @@ const Login = () => {
       return;
     }
     setErro('');
+    if (role === 'admin') {
+      setAdminLogado(true);
+      return;
+    }
     setSession({ role, nome, especialidade: role === 'medico' ? especialidade : undefined });
     if (role === 'recepcao') navigate('/recepcao');
     else if (role === 'enfermagem') navigate('/enfermagem');
@@ -88,10 +95,26 @@ const Login = () => {
     setNovoNome(''); setNovaSenha(''); setNovoRole('');
   };
 
+  const handleSairAdmin = () => {
+    setAdminLogado(false);
+    setRole(null);
+    setNome('');
+    setSenha('');
+    setNovoNome(''); setNovaSenha(''); setNovoRole('');
+    setCadastroErro(''); setCadastroOk('');
+  };
+
   const roles: { id: Role; label: string; icon: string; desc: string }[] = [
     { id: 'recepcao', label: 'Recepção', icon: '🏥', desc: 'Cadastro de pacientes' },
     { id: 'enfermagem', label: 'Triagem de Enfermagem', icon: '💉', desc: 'Sinais vitais e classificação' },
     { id: 'medico', label: 'Médico', icon: '🩺', desc: 'Chamada e atendimento' },
+    { id: 'admin', label: 'Administrador', icon: '🛡️', desc: 'Cadastro de funcionários' },
+  ];
+
+  const funcRoles: { id: FuncRole; label: string; icon: string }[] = [
+    { id: 'recepcao', label: 'Recepção', icon: '🏥' },
+    { id: 'enfermagem', label: 'Triagem', icon: '💉' },
+    { id: 'medico', label: 'Médico', icon: '🩺' },
   ];
 
   const getNomes = () => {
@@ -99,9 +122,118 @@ const Login = () => {
     if (role === 'recepcao') base = [...FUNCIONARIOS_RECEPCAO];
     else if (role === 'enfermagem') base = [...FUNCIONARIOS_ENFERMAGEM];
     else if (role === 'medico') base = [...FUNCIONARIOS_MEDICOS];
+    else if (role === 'admin') base = [...FUNCIONARIOS_ADMIN];
+    if (role === 'admin') return base;
     const extras = customs.filter((c) => c.role === role).map((c) => c.nome);
     return [...base, ...extras];
   };
+
+  // ==== Tela do Administrador autenticado ====
+  if (adminLogado) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-5">
+        <div className="bg-card border border-border rounded-[20px] p-12 w-full max-w-lg">
+          <div className="mb-8">
+            <Logo />
+          </div>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="font-heading text-2xl font-extrabold mb-1.5">Painel do Administrador</h1>
+              <p className="text-sm text-muted-foreground">Cadastrar novos funcionários no sistema.</p>
+            </div>
+            <button
+              onClick={handleSairAdmin}
+              className="text-xs text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-1.5"
+            >
+              Sair
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">
+                Nome completo
+              </label>
+              <input
+                type="text"
+                value={novoNome}
+                onChange={(e) => setNovoNome(e.target.value)}
+                placeholder="Ex: Dra. Maria Souza"
+                className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">
+                Senha (4 dígitos)
+              </label>
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                autoComplete="new-password"
+                value={novaSenha}
+                onChange={(e) => setNovaSenha(e.target.value.replace(/\D/g, ''))}
+                placeholder="••••"
+                className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary tracking-[0.5em] text-center"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">
+                Setor de trabalho
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {funcRoles.map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setNovoRole(r.id)}
+                    className={`p-2.5 rounded-lg border text-center transition-all ${
+                      novoRole === r.id
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border bg-surface2 hover:border-muted-foreground/30'
+                    }`}
+                  >
+                    <div className="text-base">{r.icon}</div>
+                    <div className="text-[11px] font-semibold mt-0.5">{r.label}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {cadastroErro && <p className="text-xs text-destructive">{cadastroErro}</p>}
+            {cadastroOk && <p className="text-xs text-emerald-500">{cadastroOk}</p>}
+
+            <button
+              type="button"
+              onClick={handleCadastrar}
+              disabled={!novoNome.trim() || novaSenha.length !== 4 || !novoRole}
+              className="w-full bg-primary text-primary-foreground rounded-[10px] py-3 text-sm font-semibold font-heading disabled:opacity-40 transition-opacity hover:opacity-90"
+            >
+              Cadastrar funcionário
+            </button>
+
+            {customs.length > 0 && (
+              <div className="mt-6 pt-4 border-t border-border">
+                <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-2">
+                  Funcionários cadastrados ({customs.length})
+                </div>
+                <ul className="space-y-1.5 max-h-48 overflow-auto">
+                  {customs.map((c) => (
+                    <li key={c.nome} className="flex justify-between text-xs bg-surface2 border border-border rounded-md px-3 py-2">
+                      <span className="font-medium">{c.nome}</span>
+                      <span className="text-muted-foreground capitalize">{c.role}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-5">
@@ -139,7 +271,7 @@ const Login = () => {
         {role && (
           <>
             <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-3 flex items-center gap-2">
-              Funcionário <span className="flex-1 h-px bg-border" />
+              {role === 'admin' ? 'Usuário' : 'Funcionário'} <span className="flex-1 h-px bg-border" />
             </div>
             <select
               value={nome}
@@ -207,88 +339,6 @@ const Login = () => {
             </button>
           </>
         )}
-
-        {/* ===== Cadastro de novo funcionário ===== */}
-        <div className="mt-8 pt-6 border-t border-border">
-          <button
-            type="button"
-            onClick={() => { setShowCadastro((v) => !v); setCadastroErro(''); setCadastroOk(''); }}
-            className="w-full flex items-center justify-between text-sm font-semibold text-foreground hover:text-primary transition-colors"
-          >
-            <span className="flex items-center gap-2">
-              <span className="text-base">➕</span> Cadastrar novo funcionário
-            </span>
-            <span className="text-muted-foreground text-xs">{showCadastro ? '▲' : '▼'}</span>
-          </button>
-
-          {showCadastro && (
-            <div className="mt-4 space-y-3">
-              <div>
-                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">
-                  Nome completo
-                </label>
-                <input
-                  type="text"
-                  value={novoNome}
-                  onChange={(e) => setNovoNome(e.target.value)}
-                  placeholder="Ex: Dra. Maria Souza"
-                  className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">
-                  Senha (4 dígitos)
-                </label>
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={4}
-                  autoComplete="new-password"
-                  value={novaSenha}
-                  onChange={(e) => setNovaSenha(e.target.value.replace(/\D/g, ''))}
-                  placeholder="••••"
-                  className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary tracking-[0.5em] text-center"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">
-                  Setor de trabalho
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {roles.map((r) => (
-                    <button
-                      key={r.id}
-                      type="button"
-                      onClick={() => setNovoRole(r.id)}
-                      className={`p-2.5 rounded-lg border text-center transition-all ${
-                        novoRole === r.id
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border bg-surface2 hover:border-muted-foreground/30'
-                      }`}
-                    >
-                      <div className="text-base">{r.icon}</div>
-                      <div className="text-[11px] font-semibold mt-0.5">{r.label}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {cadastroErro && <p className="text-xs text-destructive">{cadastroErro}</p>}
-              {cadastroOk && <p className="text-xs text-emerald-500">{cadastroOk}</p>}
-
-              <button
-                type="button"
-                onClick={handleCadastrar}
-                disabled={!novoNome.trim() || novaSenha.length !== 4 || !novoRole}
-                className="w-full bg-secondary text-secondary-foreground rounded-[10px] py-3 text-sm font-semibold font-heading disabled:opacity-40 transition-opacity hover:opacity-90"
-              >
-                Cadastrar funcionário
-              </button>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
