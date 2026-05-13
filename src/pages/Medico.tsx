@@ -377,7 +377,7 @@ const Medico = () => {
               </div>
               <div>
                 <label className="text-[11px] text-muted-foreground mb-1 block">
-                  CID-10 ({session.especialidade})
+                  CID-10 ({especialidade})
                 </label>
 
                 {/* Filtros de busca + sistema */}
