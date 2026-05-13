@@ -1,20 +1,19 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSession } from '@/lib/store';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { session, role, loading } = useAuth();
 
   useEffect(() => {
-    const session = getSession();
-    if (session) {
-      if (session.role === 'recepcao') navigate('/recepcao');
-      else if (session.role === 'enfermagem') navigate('/enfermagem');
-      else navigate('/medico');
-    } else {
-      navigate('/login');
-    }
-  }, [navigate]);
+    if (loading) return;
+    if (!session) { navigate('/login', { replace: true }); return; }
+    if (role === 'recepcao') navigate('/recepcao', { replace: true });
+    else if (role === 'enfermagem') navigate('/enfermagem', { replace: true });
+    else if (role === 'medico') navigate('/medico', { replace: true });
+    else if (role === 'admin') navigate('/login', { replace: true });
+  }, [session, role, loading, navigate]);
 
   return null;
 };

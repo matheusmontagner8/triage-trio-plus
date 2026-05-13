@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
-import { gerarCodigo, saveFicha, getSession, clearSession } from '@/lib/store';
+import { gerarCodigo, saveFicha } from '@/lib/store';
+import { useAuth } from '@/hooks/useAuth';
 
 const Recepcao = () => {
   const navigate = useNavigate();
-  const session = getSession();
+  const { session, role, nome: userNome, loading, signOut } = useAuth();
   const [nome, setNome] = useState('');
   const [idade, setIdade] = useState('');
   const [sintomas, setSintomas] = useState('');
@@ -15,10 +16,12 @@ const Recepcao = () => {
   const [sucesso, setSucesso] = useState<string | null>(null);
   const [erro, setErro] = useState('');
 
-  if (!session || session.role !== 'recepcao') {
-    navigate('/');
-    return null;
-  }
+  useEffect(() => {
+    if (loading) return;
+    if (!session || role !== 'recepcao') navigate('/login', { replace: true });
+  }, [session, role, loading, navigate]);
+
+  if (loading || !session || role !== 'recepcao') return null;
 
   const enviar = () => {
     setErro('');
@@ -58,8 +61,8 @@ const Recepcao = () => {
             <button onClick={() => navigate('/dashboard')} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
               📊 Histórico
             </button>
-            <button onClick={() => { clearSession(); navigate('/'); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              Sair ({session.nome})
+            <button onClick={async () => { await signOut(); navigate('/login'); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              Sair ({userNome})
             </button>
           </div>
         </div>
