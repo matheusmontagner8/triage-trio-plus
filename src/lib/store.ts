@@ -41,11 +41,7 @@ export interface Paciente {
   atendido?: boolean;
 }
 
-export interface UserSession {
-  role: 'recepcao' | 'enfermagem' | 'medico';
-  nome: string;
-  especialidade?: string;
-}
+// (legacy UserSession removed — auth is now handled by Supabase via useAuth hook)
 
 export const ESPECIALIDADES = [
   { id: 'clinica', nome: 'Clínica Médica', desc: 'Atendimento geral e integral' },
@@ -753,74 +749,5 @@ export function gerarCodigo(nome: string): string {
   return initials + num;
 }
 
-export function getSession(): UserSession | null {
-  const s = localStorage.getItem('triagem_session');
-  return s ? JSON.parse(s) : null;
-}
-
-export function setSession(session: UserSession) {
-  localStorage.setItem('triagem_session', JSON.stringify(session));
-}
-
-export function clearSession() {
-  localStorage.removeItem('triagem_session');
-}
-
-export function fallbackTriage(
-  temp: number, sys: number, dia: number,
-  satO2?: number, fc?: number, glicemia?: number, fr?: number
-) {
-  let cor = 'VERDE', urgencia = 'Pouco urgente', tempo = '120 min', alertas: string[] = [];
-
-  // Critical
-  if (temp > 40 || temp < 35 || sys > 180 || dia > 120 || (satO2 !== undefined && satO2 < 90) || (fc !== undefined && (fc > 150 || fc < 40)) || (glicemia !== undefined && (glicemia < 50 || glicemia > 400)) || (fr !== undefined && (fr > 35 || fr < 8))) {
-    cor = 'VERMELHO'; urgencia = 'Emergência'; tempo = 'Imediato';
-    if (temp > 40 || temp < 35) alertas.push('Temperatura crítica');
-    if (sys > 180 || dia > 120) alertas.push('Pressão arterial crítica');
-    if (satO2 !== undefined && satO2 < 90) alertas.push('Saturação O₂ crítica');
-    if (fc !== undefined && (fc > 150 || fc < 40)) alertas.push('Frequência cardíaca crítica');
-    if (glicemia !== undefined && (glicemia < 50 || glicemia > 400)) alertas.push('Glicemia crítica');
-    if (fr !== undefined && (fr > 35 || fr < 8)) alertas.push('Frequência respiratória crítica');
-  }
-  // Very urgent
-  else if (temp > 39 || sys > 160 || dia > 100 || (satO2 !== undefined && satO2 < 93) || (fc !== undefined && (fc > 130 || fc < 50)) || (glicemia !== undefined && (glicemia < 70 || glicemia > 300)) || (fr !== undefined && (fr > 28 || fr < 10))) {
-    cor = 'LARANJA'; urgencia = 'Muito urgente'; tempo = '10 min';
-  }
-  // Urgent
-  else if (temp >= 38 || sys >= 140 || dia >= 90 || (satO2 !== undefined && satO2 < 95) || (fc !== undefined && (fc > 110 || fc < 55)) || (glicemia !== undefined && (glicemia < 80 || glicemia > 200)) || (fr !== undefined && (fr > 24 || fr < 12))) {
-    cor = 'AMARELO'; urgencia = 'Urgente'; tempo = '60 min';
-  }
-
-  return { cor, urgencia, tempo, alertas };
-}
-
-// ===== Cadastro de funcionários (persistido em localStorage) =====
-export interface FuncionarioCustom {
-  nome: string;
-  senha: string;
-  role: 'recepcao' | 'enfermagem' | 'medico';
-}
-
-const FUNC_KEY = 'triagem_funcionarios';
-
-export function getFuncionariosCustom(): FuncionarioCustom[] {
-  try {
-    const raw = localStorage.getItem(FUNC_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-export function addFuncionarioCustom(f: FuncionarioCustom): { ok: boolean; erro?: string } {
-  const nome = f.nome.trim();
-  if (!nome) return { ok: false, erro: 'Informe o nome do funcionário.' };
-  if (!/^\d{4}$/.test(f.senha)) return { ok: false, erro: 'A senha deve ter exatamente 4 dígitos numéricos.' };
-  const lista = getFuncionariosCustom();
-  if (lista.some((x) => x.nome.toLowerCase() === nome.toLowerCase())) {
-    return { ok: false, erro: 'Já existe um funcionário com esse nome.' };
-  }
-  lista.push({ ...f, nome });
-  localStorage.setItem(FUNC_KEY, JSON.stringify(lista));
-  return { ok: true };
-}
+// (Session helpers and local funcionário storage removed —
+// authentication is now handled server-side via Supabase Auth + RLS.)
