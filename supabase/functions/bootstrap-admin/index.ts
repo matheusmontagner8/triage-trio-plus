@@ -5,6 +5,19 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    const admin0 = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    if (req.method === 'GET') {
+      const { count } = await admin0
+        .from('user_roles')
+        .select('id', { count: 'exact', head: true })
+        .eq('role', 'admin');
+      return json({ needsSetup: (count ?? 0) === 0 });
+    }
+
     const { email, password, nome } = await req.json();
 
     if (typeof email !== 'string' || !email.includes('@') || email.length > 255) {
