@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import TriageProtocol from '@/components/TriageProtocol';
-import { getAllPacientes, updateFicha, getSession, clearSession, CID_POR_ESPECIALIDADE, CID_SISTEMAS, verificarContraindicacoes, detectarComorbidades, type Paciente, type CidSistema } from '@/lib/store';
+import { getAllPacientes, updateFicha, CID_POR_ESPECIALIDADE, CID_SISTEMAS, verificarContraindicacoes, detectarComorbidades, type Paciente, type CidSistema } from '@/lib/store';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const COLOR_MAP: Record<string, { dot: string; bg: string; border: string; text: string }> = {
@@ -16,7 +17,7 @@ const PRIORITY_ORDER = ['VERMELHO', 'LARANJA', 'AMARELO', 'VERDE'];
 
 const Medico = () => {
   const navigate = useNavigate();
-  const session = getSession();
+  const { session, role, nome: userNome, especialidade, loading, signOut } = useAuth();
   const [ficha, setFicha] = useState<Paciente | null>(null);
   const [fila, setFila] = useState<Paciente[]>([]);
   const [atendendo, setAtendendo] = useState(false);
@@ -29,7 +30,7 @@ const Medico = () => {
   const [procedimentos, setProcedimentos] = useState('');
   const [observacoes, setObservacoes] = useState('');
 
-  const cidOptions = CID_POR_ESPECIALIDADE[session?.especialidade || ''] || [];
+  const cidOptions = CID_POR_ESPECIALIDADE[especialidade || ''] || [];
 
   const normalizar = (s: string) =>
     s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -45,17 +46,18 @@ const Medico = () => {
   });
 
   useEffect(() => {
-    if (!session || session.role !== 'medico') {
-      navigate('/');
+    if (loading) return;
+    if (!session || role !== 'medico') {
+      navigate('/login', { replace: true });
       return;
     }
     refreshFila();
     const interval = setInterval(refreshFila, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [session, role, loading, especialidade]);
 
   const refreshFila = () => {
-    const esp = session?.especialidade || '';
+    const esp = especialidade || '';
     const especialidadesPediatricas = ['Pediatria', 'Ortopedia'];
     const triados = getAllPacientes()
       .filter(p => p.triado && p.triagem && !p.chamado)
@@ -77,7 +79,7 @@ const Medico = () => {
   const chamarPaciente = (p: Paciente) => {
     setFicha(p);
     setAtendendo(true);
-    updateFicha(p.codigo, { chamado: true, medicoResponsavel: session?.nome });
+    updateFicha(p.codigo, { chamado: true, medicoResponsavel: userNome });
     refreshFila();
   };
 
@@ -106,7 +108,7 @@ const Medico = () => {
         dataAtendimento: new Date().toLocaleString('pt-BR'),
       };
       updateFicha(ficha.codigo, { atendido: true, prescricao: prescricaoData });
-      setFichaFinalizada({ ...ficha, atendido: true, prescricao: prescricaoData, medicoResponsavel: session?.nome });
+      setFichaFinalizada({ ...ficha, atendido: true, prescricao: prescricaoData, medicoResponsavel: userNome });
     }
     setFicha(null);
     setAtendendo(false);
@@ -172,14 +174,14 @@ const Medico = () => {
     <div class="rx"><div class="label">Medicamentos</div><div class="value">${esc(p.prescricao?.medicamentos) || '—'}</div></div>
     <div class="rx"><div class="label">Procedimentos</div><div class="value">${esc(p.prescricao?.procedimentos) || '—'}</div></div>
     <div class="rx"><div class="label">Observações</div><div class="value">${esc(p.prescricao?.observacoes) || '—'}</div></div>
-    <div class="sig"><div class="sig-line">${esc(p.medicoResponsavel || session?.nome)}<br/><span style="font-size:11px;color:#888">${esc(session?.especialidade || '')}</span></div></div>
+    <div class="sig"><div class="sig-line">${esc(p.medicoResponsavel || userNome)}<br/><span style="font-size:11px;color:#888">${esc(especialidade || '')}</span></div></div>
     <div class="footer">Documento gerado pelo sistema TriageEngine — Protocolo de Manchester<br/>Este documento não substitui a avaliação clínica presencial.</div>
     </body></html>`);
     w.document.close();
     w.print();
   };
 
-  if (!session || session.role !== 'medico') return null;
+  if (loading || !session || role !== 'medico') return null;
 
   const colors = ficha?.triagem ? COLOR_MAP[ficha.triagem.cor] || COLOR_MAP.VERDE : null;
 
@@ -191,8 +193,8 @@ const Medico = () => {
 
         <div className="bg-surface2 border border-border rounded-lg p-3 text-xs">
           <div className="text-muted-foreground mb-1">Médico</div>
-          <div className="font-semibold">{session.nome}</div>
-          <div className="text-primary text-[11px] mt-0.5">{session.especialidade}</div>
+          <div className="font-semibold">{userNome}</div>
+          <div className="text-primary text-[11px] mt-0.5">{especialidade}</div>
         </div>
 
         <TriageProtocol />
@@ -201,7 +203,7 @@ const Medico = () => {
           Sistema de apoio à triagem.<br />Não substitui avaliação clínica presencial.
           <br />
           <button onClick={() => navigate('/dashboard')} className="text-primary hover:underline mt-2 inline-block mr-3">📊 Histórico</button>
-          <button onClick={() => { clearSession(); navigate('/'); }} className="text-primary hover:underline mt-2 inline-block">Sair</button>
+          <button onClick={async () => { await signOut(); navigate('/login'); }} className="text-primary hover:underline mt-2 inline-block">Sair</button>
         </div>
       </aside>
 
@@ -216,7 +218,7 @@ const Medico = () => {
             <div className="font-heading font-bold text-[15px] mb-2">
               Fila de atendimento ({fila.length})
             </div>
-            {!['Pediatria', 'Ortopedia'].includes(session?.especialidade || '') && (
+            {!['Pediatria', 'Ortopedia'].includes(especialidade || '') && (
               <p className="text-[11px] text-muted-foreground mb-3">
                 ℹ Pacientes de 0 a 10 anos são direcionados apenas para Pediatria ou Ortopedia.
               </p>
@@ -375,7 +377,7 @@ const Medico = () => {
               </div>
               <div>
                 <label className="text-[11px] text-muted-foreground mb-1 block">
-                  CID-10 ({session.especialidade})
+                  CID-10 ({especialidade})
                 </label>
 
                 {/* Filtros de busca + sistema */}

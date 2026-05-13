@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import TriageProtocol from '@/components/TriageProtocol';
-import { getAllPacientes, updateFicha, fallbackTriage, getSession, clearSession, type Paciente } from '@/lib/store';
+import { getAllPacientes, updateFicha, fallbackTriage, type Paciente } from '@/lib/store';
+import { useAuth } from '@/hooks/useAuth';
 
 const COLOR_MAP: Record<string, { dot: string; bg: string; border: string; text: string }> = {
   VERMELHO: { dot: 'bg-triage-red', bg: 'bg-triage-red-bg', border: 'border-triage-red-border', text: 'text-triage-red' },
@@ -13,7 +14,7 @@ const COLOR_MAP: Record<string, { dot: string; bg: string; border: string; text:
 
 const Enfermagem = () => {
   const navigate = useNavigate();
-  const session = getSession();
+  const { session, role, nome: userNome, loading, signOut } = useAuth();
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [selected, setSelected] = useState<Paciente | null>(null);
   const [temp, setTemp] = useState('');
@@ -28,14 +29,15 @@ const Enfermagem = () => {
   const [resultadoTriagem, setResultadoTriagem] = useState<{ cor: string; urgencia: string; tempo: string; alertas: string[] } | null>(null);
 
   useEffect(() => {
-    if (!session || session.role !== 'enfermagem') {
-      navigate('/');
+    if (loading) return;
+    if (!session || role !== 'enfermagem') {
+      navigate('/login', { replace: true });
       return;
     }
     refreshList();
     const interval = setInterval(refreshList, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [session, role, loading]);
 
   const refreshList = () => {
     const all = getAllPacientes().filter(p => !p.triado);
@@ -90,7 +92,7 @@ const Enfermagem = () => {
     }, 4000);
   };
 
-  if (!session || session.role !== 'enfermagem') return null;
+  if (loading || !session || role !== 'enfermagem') return null;
 
   const colors = resultadoTriagem ? COLOR_MAP[resultadoTriagem.cor] || COLOR_MAP.VERDE : null;
 
@@ -101,10 +103,10 @@ const Enfermagem = () => {
         <Logo subtitle="Enfermagem" />
         <TriageProtocol />
         <div className="mt-auto text-[10px] text-muted-foreground leading-relaxed">
-          Triagem de enfermagem — {session.nome}
+          Triagem de enfermagem — {userNome}
           <br />
           <button onClick={() => navigate('/dashboard')} className="text-primary hover:underline mt-2 inline-block mr-3">📊 Histórico</button>
-          <button onClick={() => { clearSession(); navigate('/'); }} className="text-primary hover:underline mt-2 inline-block">Sair</button>
+          <button onClick={async () => { await signOut(); navigate('/login'); }} className="text-primary hover:underline mt-2 inline-block">Sair</button>
         </div>
       </aside>
 

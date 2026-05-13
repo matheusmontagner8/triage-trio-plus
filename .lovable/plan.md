@@ -1,41 +1,50 @@
-## Plano
+## Goal
+Replace the hardcoded-PIN + localStorage login with real server-side authentication using Lovable Cloud (Supabase Auth + RLS), fixing both security findings.
 
-### 1. Adicionar o arquivo `.env` ao projeto
-- Copiar o arquivo enviado (`user-uploads://env`) para a raiz do projeto como `.env`, contendo:
-  ```
-  VITE_GEMINI_API_KEY='AIzaSyBlmsis3Axwt0jV1GXJldvzryk9v_kKog4'
-  ```
-- Garantir que `.env` esteja listado no `.gitignore` (verificar/atualizar).
-- Observação: por enquanto a chave fica disponível em `import.meta.env.VITE_GEMINI_API_KEY` para uso futuro. Nenhum código de IA será adicionado agora — apenas o registro da variável.
-- Aviso de segurança: como esta chave foi compartilhada em texto, recomendo regenerá-la no Google AI Studio depois.
+## Steps
 
-### 2. Expandir as especialidades médicas
-Em `src/lib/store.ts`, atualizar a constante `ESPECIALIDADES`, adicionando 5 opções:
-- Clínica Médica (existente)
-- Pediatria (existente)
-- Psiquiatria
-- Cirurgia Geral
-- Ginecologia
-- Ortopedia
-- Obstetrícia
+### 1. Enable Lovable Cloud
+Provision the backend so we have Auth, a database, and Edge Functions.
 
-Atualizar também o mapa `CID_POR_ESPECIALIDADE` para que cada nova especialidade utilize a lista `CIDS_COMUNS` (mantendo o autocomplete funcional). No futuro pode-se refinar o conjunto de CIDs por especialidade, mas por ora todos terão a lista geral.
+### 2. Database schema (migration)
+- `profiles` table: `id (uuid, FK auth.users)`, `nome text`, `created_at`. Auto-populated via trigger on `auth.users` insert.
+- `app_role` enum: `recepcao`, `enfermagem`, `medico`, `admin`.
+- `user_roles` table: `id`, `user_id`, `role app_role`, `especialidade text null`, unique `(user_id, role)`.
+- `has_role(_user_id uuid, _role app_role)` SECURITY DEFINER function (avoids RLS recursion).
+- RLS policies:
+  - `profiles`: users can select their own; admins can select all.
+  - `user_roles`: users can select their own row; only admins can insert/update/delete.
 
-A tela de Login já renderiza dinamicamente `ESPECIALIDADES.map(...)` — as novas opções aparecerão automaticamente após o médico selecionar o nome.
+### 3. Auth flow refactor (`src/pages/Login.tsx`)
+- Replace PIN selector with **email + password** form.
+- Use `supabase.auth.signInWithPassword`.
+- After login, fetch the user's role from `user_roles` and route to `/recepcao`, `/enfermagem`, `/medico`, or admin panel.
+- Remove all hardcoded `SENHAS_PADRAO` and `FUNCIONARIOS_*` lists.
 
-### 3. Restringir crianças (0–10 anos) a Pediatria ou Ortopedia
-A idade é registrada na ficha do paciente (`Paciente.idade`). A regra será aplicada na fila do médico (`src/pages/Medico.tsx`), no `refreshFila`:
+### 4. Admin panel — create employees
+- Replace local `addFuncionarioCustom` with an Edge Function `create-employee` (uses service role key) that:
+  - Verifies the caller is `admin` via `has_role`.
+  - Creates a new `auth.users` (email + password), inserts `profiles` row, inserts `user_roles` row.
+- Admin form collects: nome, email, senha, setor, (especialidade if médico).
 
-- Calcular `idadeNum = parseInt(p.idade)`.
-- Se `idadeNum >= 0 && idadeNum <= 10`:
-  - O paciente só aparece para médicos cuja `session.especialidade` seja **Pediatria** ou **Ortopedia**.
-- Médicos de outras especialidades (Clínica, Psiquiatria, Cirurgia Geral, Ginecologia, Obstetrícia) não verão pacientes nessa faixa etária na fila e portanto não poderão chamá-los.
+### 5. Session handling
+- Replace `getSession()` / `setSession()` in `src/lib/store.ts` with a `useAuth` hook that reads from `supabase.auth` + `user_roles`.
+- Each protected page (`Recepcao`, `Enfermagem`, `Medico`) gates render on real session + role check; unauthenticated → redirect to `/`.
+- Listen with `onAuthStateChange` so logout/refresh works.
 
-Adicionalmente, exibir um pequeno texto informativo no cabeçalho da fila quando a especialidade ativa for diferente de Pediatria/Ortopedia, indicando que pacientes de 0–10 anos estão filtrados para esses dois setores.
+### 6. Bootstrap admin
+After migration, document that the first admin must be created via the Cloud Users panel (or seed one in the migration with a known temp password the user rotates). I'll seed one admin: email `admin@clinica.local` / password `Admin1234!` with role `admin`, and tell the user to change it.
 
-### Detalhes técnicos
-- `src/lib/store.ts`: adicionar entradas em `ESPECIALIDADES` e em `CID_POR_ESPECIALIDADE`.
-- `src/pages/Medico.tsx`: ajustar o filtro do `refreshFila` para aplicar a regra de idade vs. especialidade; adicionar nota visual opcional na fila.
-- `.env` na raiz + verificação do `.gitignore`.
+### 7. Cleanup
+- Remove `funcionariosCustom` localStorage logic from `store.ts`.
+- Keep patient/queue data (`pacientes`, etc.) in localStorage for now — those weren't flagged and changing them is out of scope.
 
-Nenhuma outra tela precisa de alteração — Recepção segue cadastrando idade normalmente e Login já lista especialidades dinamicamente.
+## Out of scope
+- Migrating patient/triage data to the database.
+- Email verification / password reset flows (can be added later).
+- Google / SSO providers.
+
+## Result
+- Passwords stored as hashes in Supabase Auth (not in JS bundle).
+- Roles enforced server-side via RLS + `has_role`.
+- Both security findings resolved.

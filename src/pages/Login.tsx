@@ -1,347 +1,269 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
-import {
-  ESPECIALIDADES,
-  setSession,
-  getFuncionariosCustom,
-  addFuncionarioCustom,
-  type FuncionarioCustom,
-} from '@/lib/store';
+import { ESPECIALIDADES } from '@/lib/store';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth, type AppRole } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
-const FUNCIONARIOS_RECEPCAO = ['Ana Santos'];
-const FUNCIONARIOS_ENFERMAGEM = ['Carlos Oliveira', 'Mariana Silva'];
-const FUNCIONARIOS_MEDICOS = [
-  'Dr. Ricardo Mendes',
-  'Dra. Fernanda Costa',
-  'Dr. Paulo Almeida',
-  'Dra. Juliana Rocha',
-  'Dr. André Barbosa',
-  'Dra. Camila Ferreira',
-];
-const FUNCIONARIOS_ADMIN = ['Administrador'];
-
-const SENHAS_PADRAO: Record<string, string> = {
-  'Ana Santos': '1111',
-  'Carlos Oliveira': '2222',
-  'Mariana Silva': '3333',
-  'Dr. Ricardo Mendes': '4444',
-  'Dra. Fernanda Costa': '5555',
-  'Dr. Paulo Almeida': '6666',
-  'Dra. Juliana Rocha': '7777',
-  'Dr. André Barbosa': '8888',
-  'Dra. Camila Ferreira': '9999',
-  'Administrador': '0000',
-};
-
-type Role = 'recepcao' | 'enfermagem' | 'medico' | 'admin';
 type FuncRole = 'recepcao' | 'enfermagem' | 'medico';
 
+const ROLE_ROUTES: Record<AppRole, string> = {
+  recepcao: '/recepcao',
+  enfermagem: '/enfermagem',
+  medico: '/medico',
+  admin: '/',
+};
+
 const Login = () => {
-  const [role, setRole] = useState<Role | null>(null);
-  const [nome, setNome] = useState('');
-  const [especialidade, setEspecialidade] = useState('');
+  const navigate = useNavigate();
+  const { session, role, refresh, signOut } = useAuth();
+
+  const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
-  const [customs, setCustoms] = useState<FuncionarioCustom[]>([]);
-  const [adminLogado, setAdminLogado] = useState(false);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  // Cadastro
+  // Setup-admin (only if no admin exists)
+  const [precisaSetup, setPrecisaSetup] = useState(false);
+  const [setupNome, setSetupNome] = useState('');
+  const [setupEmail, setSetupEmail] = useState('');
+  const [setupSenha, setSetupSenha] = useState('');
+  const [setupErro, setSetupErro] = useState('');
+
+  // Cadastro funcionário (admin)
   const [novoNome, setNovoNome] = useState('');
+  const [novoEmail, setNovoEmail] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [novoRole, setNovoRole] = useState<FuncRole | ''>('');
-  const [cadastroErro, setCadastroErro] = useState('');
-  const [cadastroOk, setCadastroOk] = useState('');
+  const [novaEspecialidade, setNovaEspecialidade] = useState('');
+  const [cadErro, setCadErro] = useState('');
+  const [cadOk, setCadOk] = useState('');
 
+  // Detect if admin exists (try a HEAD count via roles RLS lets nothing through if not signed in,
+  // so we check via the bootstrap-admin function returning a friendly error).
   useEffect(() => {
-    setSenha('');
+    let cancelled = false;
+    (async () => {
+      if (session) return;
+      try {
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bootstrap-admin`;
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+        });
+        const data = await res.json();
+        if (!cancelled) setPrecisaSetup(!!data.needsSetup);
+      } catch {
+        if (!cancelled) setPrecisaSetup(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [session]);
+
+  // Redirect after auth + role load
+  useEffect(() => {
+    if (!session || !role) return;
+    if (role !== 'admin') navigate(ROLE_ROUTES[role], { replace: true });
+  }, [session, role, navigate]);
+
+  const handleLogin = async () => {
     setErro('');
-    setCustoms(getFuncionariosCustom());
-  }, []);
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: senha });
+    setLoading(false);
+    if (error) { setErro('Email ou senha incorretos.'); return; }
+    await refresh();
+  };
 
-  const senhasMap = useMemo(() => {
-    const map: Record<string, string> = { ...SENHAS_PADRAO };
-    customs.forEach((c) => { map[c.nome] = c.senha; });
-    return map;
-  }, [customs]);
-
-  const handleLogin = () => {
-    if (!role || !nome) return;
-    if (role === 'medico' && !especialidade) return;
-    if (senhasMap[nome] !== senha) {
-      setErro('Senha incorreta. Tente novamente.');
+  const handleSetup = async () => {
+    setSetupErro('');
+    setLoading(true);
+    const { data, error } = await supabase.functions.invoke('bootstrap-admin', {
+      body: { email: setupEmail.trim(), password: setupSenha, nome: setupNome.trim() },
+    });
+    setLoading(false);
+    if (error || (data as any)?.error) {
+      setSetupErro((data as any)?.error || 'Falha ao configurar administrador.');
       return;
     }
-    setErro('');
-    if (role === 'admin') {
-      setAdminLogado(true);
+    toast.success('Administrador criado! Faça login.');
+    setPrecisaSetup(false);
+    setEmail(setupEmail.trim());
+    setSenha('');
+  };
+
+  const handleCadastrar = async () => {
+    setCadErro(''); setCadOk('');
+    if (!novoRole) { setCadErro('Selecione o setor de trabalho.'); return; }
+    if (novoRole === 'medico' && !novaEspecialidade) { setCadErro('Selecione a especialidade do médico.'); return; }
+    setLoading(true);
+    const { data, error } = await supabase.functions.invoke('create-employee', {
+      body: {
+        email: novoEmail.trim(),
+        password: novaSenha,
+        nome: novoNome.trim(),
+        role: novoRole,
+        especialidade: novoRole === 'medico' ? novaEspecialidade : undefined,
+      },
+    });
+    setLoading(false);
+    if (error || (data as any)?.error) {
+      setCadErro((data as any)?.error || 'Não foi possível cadastrar.');
       return;
     }
-    setSession({ role, nome, especialidade: role === 'medico' ? especialidade : undefined });
-    if (role === 'recepcao') navigate('/recepcao');
-    else if (role === 'enfermagem') navigate('/enfermagem');
-    else navigate('/medico');
+    setCadOk(`Funcionário "${novoNome.trim()}" cadastrado!`);
+    setNovoNome(''); setNovoEmail(''); setNovaSenha(''); setNovoRole(''); setNovaEspecialidade('');
   };
 
-  const handleCadastrar = () => {
-    setCadastroErro('');
-    setCadastroOk('');
-    if (!novoRole) { setCadastroErro('Selecione o setor de trabalho.'); return; }
-    const res = addFuncionarioCustom({ nome: novoNome, senha: novaSenha, role: novoRole });
-    if (!res.ok) { setCadastroErro(res.erro || 'Não foi possível cadastrar.'); return; }
-    setCustoms(getFuncionariosCustom());
-    setCadastroOk(`Funcionário "${novoNome.trim()}" cadastrado com sucesso!`);
-    setNovoNome(''); setNovaSenha(''); setNovoRole('');
-  };
-
-  const handleSairAdmin = () => {
-    setAdminLogado(false);
-    setRole(null);
-    setNome('');
-    setSenha('');
-    setNovoNome(''); setNovaSenha(''); setNovoRole('');
-    setCadastroErro(''); setCadastroOk('');
-  };
-
-  const roles: { id: Role; label: string; icon: string; desc: string }[] = [
-    { id: 'recepcao', label: 'Recepção', icon: '🏥', desc: 'Cadastro de pacientes' },
-    { id: 'enfermagem', label: 'Triagem de Enfermagem', icon: '💉', desc: 'Sinais vitais e classificação' },
-    { id: 'medico', label: 'Médico', icon: '🩺', desc: 'Chamada e atendimento' },
-    { id: 'admin', label: 'Administrador', icon: '🛡️', desc: 'Cadastro de funcionários' },
-  ];
-
-  const funcRoles: { id: FuncRole; label: string; icon: string }[] = [
-    { id: 'recepcao', label: 'Recepção', icon: '🏥' },
-    { id: 'enfermagem', label: 'Triagem', icon: '💉' },
-    { id: 'medico', label: 'Médico', icon: '🩺' },
-  ];
-
-  const getNomes = () => {
-    let base: string[] = [];
-    if (role === 'recepcao') base = [...FUNCIONARIOS_RECEPCAO];
-    else if (role === 'enfermagem') base = [...FUNCIONARIOS_ENFERMAGEM];
-    else if (role === 'medico') base = [...FUNCIONARIOS_MEDICOS];
-    else if (role === 'admin') base = [...FUNCIONARIOS_ADMIN];
-    if (role === 'admin') return base;
-    const extras = customs.filter((c) => c.role === role).map((c) => c.nome);
-    return [...base, ...extras];
-  };
-
-  // ==== Tela do Administrador autenticado ====
-  if (adminLogado) {
+  // ===== Setup-admin screen =====
+  if (precisaSetup && !session) {
     return (
       <div className="min-h-screen flex items-center justify-center p-5">
         <div className="bg-card border border-border rounded-[20px] p-12 w-full max-w-lg">
-          <div className="mb-8">
-            <Logo />
-          </div>
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="font-heading text-2xl font-extrabold mb-1.5">Painel do Administrador</h1>
-              <p className="text-sm text-muted-foreground">Cadastrar novos funcionários no sistema.</p>
-            </div>
-            <button
-              onClick={handleSairAdmin}
-              className="text-xs text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-1.5"
-            >
-              Sair
-            </button>
-          </div>
+          <div className="mb-8"><Logo /></div>
+          <h1 className="font-heading text-2xl font-extrabold mb-1.5">Configuração inicial</h1>
+          <p className="text-sm text-muted-foreground mb-6">Crie o primeiro administrador do sistema.</p>
 
           <div className="space-y-3">
-            <div>
-              <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">
-                Nome completo
-              </label>
-              <input
-                type="text"
-                value={novoNome}
-                onChange={(e) => setNovoNome(e.target.value)}
-                placeholder="Ex: Dra. Maria Souza"
-                className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary"
-              />
-            </div>
-
-            <div>
-              <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">
-                Senha (4 dígitos)
-              </label>
-              <input
-                type="password"
-                inputMode="numeric"
-                maxLength={4}
-                autoComplete="new-password"
-                value={novaSenha}
-                onChange={(e) => setNovaSenha(e.target.value.replace(/\D/g, ''))}
-                placeholder="••••"
-                className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary tracking-[0.5em] text-center"
-              />
-            </div>
-
-            <div>
-              <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">
-                Setor de trabalho
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {funcRoles.map((r) => (
-                  <button
-                    key={r.id}
-                    type="button"
-                    onClick={() => setNovoRole(r.id)}
-                    className={`p-2.5 rounded-lg border text-center transition-all ${
-                      novoRole === r.id
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border bg-surface2 hover:border-muted-foreground/30'
-                    }`}
-                  >
-                    <div className="text-base">{r.icon}</div>
-                    <div className="text-[11px] font-semibold mt-0.5">{r.label}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {cadastroErro && <p className="text-xs text-destructive">{cadastroErro}</p>}
-            {cadastroOk && <p className="text-xs text-emerald-500">{cadastroOk}</p>}
-
+            <Field label="Nome" value={setupNome} onChange={setSetupNome} placeholder="Nome do administrador" />
+            <Field label="Email" type="email" value={setupEmail} onChange={setSetupEmail} placeholder="admin@clinica.com" />
+            <Field label="Senha (mín. 8 caracteres)" type="password" value={setupSenha} onChange={setSetupSenha} placeholder="••••••••" />
+            {setupErro && <p className="text-xs text-destructive">{setupErro}</p>}
             <button
-              type="button"
-              onClick={handleCadastrar}
-              disabled={!novoNome.trim() || novaSenha.length !== 4 || !novoRole}
-              className="w-full bg-primary text-primary-foreground rounded-[10px] py-3 text-sm font-semibold font-heading disabled:opacity-40 transition-opacity hover:opacity-90"
+              onClick={handleSetup}
+              disabled={loading || !setupNome.trim() || !setupEmail.includes('@') || setupSenha.length < 8}
+              className="w-full bg-primary text-primary-foreground rounded-[10px] py-3.5 text-sm font-semibold font-heading disabled:opacity-40"
             >
-              Cadastrar funcionário
+              {loading ? 'Criando…' : 'Criar administrador'}
             </button>
-
-            {customs.length > 0 && (
-              <div className="mt-6 pt-4 border-t border-border">
-                <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-2">
-                  Funcionários cadastrados ({customs.length})
-                </div>
-                <ul className="space-y-1.5 max-h-48 overflow-auto">
-                  {customs.map((c) => (
-                    <li key={c.nome} className="flex justify-between text-xs bg-surface2 border border-border rounded-md px-3 py-2">
-                      <span className="font-medium">{c.nome}</span>
-                      <span className="text-muted-foreground capitalize">{c.role}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         </div>
       </div>
     );
   }
 
+  // ===== Admin panel =====
+  if (session && role === 'admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-5">
+        <div className="bg-card border border-border rounded-[20px] p-12 w-full max-w-lg">
+          <div className="mb-8"><Logo /></div>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="font-heading text-2xl font-extrabold mb-1.5">Painel do Administrador</h1>
+              <p className="text-sm text-muted-foreground">Cadastre novos funcionários no sistema.</p>
+            </div>
+            <button onClick={() => signOut()} className="text-xs text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-1.5">
+              Sair
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            <Field label="Nome completo" value={novoNome} onChange={setNovoNome} placeholder="Ex: Dra. Maria Souza" />
+            <Field label="Email" type="email" value={novoEmail} onChange={setNovoEmail} placeholder="maria@clinica.com" />
+            <Field label="Senha (mín. 8 caracteres)" type="password" value={novaSenha} onChange={setNovaSenha} placeholder="••••••••" />
+
+            <div>
+              <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">Setor</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['recepcao', 'enfermagem', 'medico'] as FuncRole[]).map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setNovoRole(r)}
+                    className={`p-2.5 rounded-lg border text-center text-[11px] font-semibold capitalize ${
+                      novoRole === r ? 'border-primary bg-primary/5' : 'border-border bg-surface2'
+                    }`}
+                  >
+                    {r === 'recepcao' ? 'Recepção' : r === 'enfermagem' ? 'Triagem' : 'Médico'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {novoRole === 'medico' && (
+              <div>
+                <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">Especialidade</label>
+                <select
+                  value={novaEspecialidade}
+                  onChange={(e) => setNovaEspecialidade(e.target.value)}
+                  className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary"
+                >
+                  <option value="">Selecione…</option>
+                  {ESPECIALIDADES.map((e) => <option key={e.id} value={e.nome}>{e.nome}</option>)}
+                </select>
+              </div>
+            )}
+
+            {cadErro && <p className="text-xs text-destructive">{cadErro}</p>}
+            {cadOk && <p className="text-xs text-emerald-500">{cadOk}</p>}
+
+            <button
+              type="button"
+              onClick={handleCadastrar}
+              disabled={loading || !novoNome.trim() || !novoEmail.includes('@') || novaSenha.length < 8 || !novoRole}
+              className="w-full bg-primary text-primary-foreground rounded-[10px] py-3 text-sm font-semibold font-heading disabled:opacity-40"
+            >
+              {loading ? 'Cadastrando…' : 'Cadastrar funcionário'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ===== Login screen =====
   return (
     <div className="min-h-screen flex items-center justify-center p-5">
       <div className="bg-card border border-border rounded-[20px] p-12 w-full max-w-lg">
-        <div className="mb-8">
-          <Logo />
-        </div>
+        <div className="mb-8"><Logo /></div>
         <h1 className="font-heading text-2xl font-extrabold mb-1.5">Acesso ao Sistema</h1>
-        <p className="text-sm text-muted-foreground mb-6">Selecione seu setor e identifique-se para continuar.</p>
+        <p className="text-sm text-muted-foreground mb-6">Entre com seu email e senha.</p>
 
-        {/* Role selection */}
-        <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-3 flex items-center gap-2">
-          Setor <span className="flex-1 h-px bg-border" />
+        <div className="space-y-3">
+          <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="seu@email.com" />
+          <div>
+            <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">Senha</label>
+            <input
+              type="password"
+              value={senha}
+              onChange={(e) => { setSenha(e.target.value); setErro(''); }}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}
+              placeholder="••••••••"
+              className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary"
+            />
+          </div>
+          {erro && <p className="text-xs text-destructive">{erro}</p>}
+          <button
+            onClick={handleLogin}
+            disabled={loading || !email.includes('@') || senha.length < 1}
+            className="w-full bg-primary text-primary-foreground rounded-[10px] py-3.5 text-sm font-semibold font-heading disabled:opacity-40"
+          >
+            {loading ? 'Entrando…' : 'Entrar'}
+          </button>
         </div>
-        <div className="grid gap-3 mb-6">
-          {roles.map((r) => (
-            <button
-              key={r.id}
-              onClick={() => { setRole(r.id); setNome(''); setEspecialidade(''); setSenha(''); setErro(''); }}
-              className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
-                role === r.id
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border bg-surface2 hover:border-muted-foreground/30'
-              }`}
-            >
-              <span className="text-xl">{r.icon}</span>
-              <div>
-                <div className="text-sm font-semibold">{r.label}</div>
-                <div className="text-xs text-muted-foreground">{r.desc}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {role && (
-          <>
-            <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-3 flex items-center gap-2">
-              {role === 'admin' ? 'Usuário' : 'Funcionário'} <span className="flex-1 h-px bg-border" />
-            </div>
-            <select
-              value={nome}
-              onChange={(e) => { setNome(e.target.value); setSenha(''); setErro(''); }}
-              className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary mb-4"
-            >
-              <option value="">Selecione seu nome</option>
-              {getNomes().map((n) => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </select>
-
-            {role === 'medico' && (
-              <>
-                <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-3 flex items-center gap-2">
-                  Especialidade <span className="flex-1 h-px bg-border" />
-                </div>
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                  {ESPECIALIDADES.map((esp) => (
-                    <button
-                      key={esp.id}
-                      onClick={() => setEspecialidade(esp.nome)}
-                      className={`p-3 rounded-lg border text-left transition-all ${
-                        especialidade === esp.nome
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border bg-surface2 hover:border-muted-foreground/30'
-                      }`}
-                    >
-                      <div className="text-xs font-semibold">{esp.nome}</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">{esp.desc}</div>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {nome && (role !== 'medico' || especialidade) && (
-              <>
-                <div className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-3 flex items-center gap-2">
-                  Senha (4 dígitos) <span className="flex-1 h-px bg-border" />
-                </div>
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={4}
-                  value={senha}
-                  autoComplete="new-password"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  onChange={(e) => { setSenha(e.target.value.replace(/\D/g, '')); setErro(''); }}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}
-                  placeholder="••••"
-                  className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary mb-2 tracking-[0.5em] text-center"
-                />
-                {erro && <p className="text-xs text-destructive mb-2">{erro}</p>}
-              </>
-            )}
-
-            <button
-              onClick={handleLogin}
-              disabled={!nome || (role === 'medico' && !especialidade) || senha.length !== 4}
-              className="w-full bg-primary text-primary-foreground rounded-[10px] py-3.5 text-sm font-semibold font-heading disabled:opacity-40 transition-opacity hover:opacity-90 mt-2"
-            >
-              Entrar no sistema
-            </button>
-          </>
-        )}
       </div>
     </div>
   );
 };
+
+function Field({ label, value, onChange, type = 'text', placeholder }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string;
+}) {
+  return (
+    <div>
+      <label className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground mb-1.5 block">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        autoComplete={type === 'password' ? 'new-password' : undefined}
+        className="w-full bg-surface2 border border-border rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary"
+      />
+    </div>
+  );
+}
 
 export default Login;
