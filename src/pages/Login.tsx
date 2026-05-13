@@ -46,20 +46,16 @@ const Login = () => {
     let cancelled = false;
     (async () => {
       if (session) return;
-      // Probe: call bootstrap-admin with empty body to learn if setup is needed.
       try {
-        const { data, error } = await supabase.functions.invoke('bootstrap-admin', {
-          body: {},
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bootstrap-admin`;
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
         });
-        if (cancelled) return;
-        // Returns 400 invalid email if setup still needed; 403 if already set up.
-        const msg = (error as any)?.context?.body || (data as any)?.error || (error as any)?.message || '';
-        const text = typeof msg === 'string' ? msg : JSON.stringify(msg);
-        if (text.includes('Administrador já configurado')) setPrecisaSetup(false);
-        else setPrecisaSetup(true);
+        const data = await res.json();
+        if (!cancelled) setPrecisaSetup(!!data.needsSetup);
       } catch {
-        // Default: assume setup not needed
-        setPrecisaSetup(false);
+        if (!cancelled) setPrecisaSetup(false);
       }
     })();
     return () => { cancelled = true; };
