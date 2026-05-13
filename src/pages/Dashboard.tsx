@@ -4,7 +4,8 @@ import { Search } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { getAllPacientes, getSession, type Paciente } from '@/lib/store';
+import { getAllPacientes, type Paciente } from '@/lib/store';
+import { useAuth } from '@/hooks/useAuth';
 
 const COLOR_LABELS: Record<string, { label: string; dot: string; bg: string; border: string }> = {
   VERMELHO: { label: 'Vermelho', dot: 'bg-triage-red', bg: 'bg-triage-red-bg', border: 'border-triage-red-border' },
@@ -15,12 +16,12 @@ const COLOR_LABELS: Record<string, { label: string; dot: string; bg: string; bor
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const session = getSession();
+  const { session, loading } = useAuth();
   useEffect(() => {
-    if (!session) navigate('/login', { replace: true });
-  }, [session, navigate]);
+    if (!loading && !session) navigate('/login', { replace: true });
+  }, [session, loading, navigate]);
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
-  if (!session) return null;
+  if (loading || !session) return null;
   const [busca, setBusca] = useState('');
   const [filtroCor, setFiltroCor] = useState<string>('TODOS');
   const [filtroPeriodo, setFiltroPeriodo] = useState<'TODOS' | 'HOJE' | 'SEMANA' | 'MES'>('TODOS');
